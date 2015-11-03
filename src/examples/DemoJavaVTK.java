@@ -1,4 +1,4 @@
-package sample;
+package examples;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -86,7 +86,7 @@ public class DemoJavaVTK extends JPanel implements ActionListener
 	vtkContourFilter contour = new vtkContourFilter();
 	contour.SetInputConnection(sample.GetOutputPort());
 	contour.GenerateValues(3,0,1);
-		
+
 	/* mapper, translates polygonal representation to graphics primitives */
 	vtkPolyDataMapper isoMapper = new vtkPolyDataMapper();
         isoMapper.SetInputConnection(contour.GetOutputPort());

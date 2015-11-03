@@ -1,0 +1,18 @@
+ERROR: In C:\Users\felix\Downloads\VTK-6.3.0\VTK-6.3.0\IO\Image\vtkDICOMImageReader.cxx, line 270
+vtkDICOMImageReader (0000000001183550): There was a problem retrieving data from: data/VOLUMEMERGE/STIR_TSE_MT - 502/IM-0001-0002.dcm
+
+
+ERROR: In C:\Users\felix\Downloads\VTK-6.3.0\VTK-6.3.0\Common\ExecutionModel\vtkExecutive.cxx, line 784
+vtkCompositeDataPipeline (00000000010F7700): Algorithm vtkDICOMImageReader(0000000001183550) returned failure for request: vtkInformation (000000001BB842D0)
+  Debug: Off
+  Modified Time: 168
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_DATA
+  FROM_OUTPUT_PORT: 0
+  FORWARD_DIRECTION: 0
+  ALGORITHM_AFTER_FORWARD: 1
+
+
+
+
