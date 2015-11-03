@@ -1,21 +1,25 @@
 package gui;
 
 import javafx.animation.FadeTransition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import utils.DicomUtil;
-import visualization.OrthogonalSliceRenderer;
-import visualization.Renderer;
+import visualizations.BlankVisualization;
+import visualizations.MIPVisualization;
+import visualizations.OrthogonalSlicesVisualization;
+import visualizations.Visualization;
 import vtk.vtkImageData;
-import javafx.scene.canvas.Canvas;
 
 import java.io.File;
 
@@ -33,10 +37,14 @@ public class Controller {
     private AnchorPane vtkPane;
     @FXML
     private Label dataPathLabel;
+    @FXML
+    private ComboBox visTypeCombo;
+    @FXML
+    private AnchorPane settingsPane;
 
     private Stage stage;
     private vtkImageData img;
-    private Renderer renderer;
+    private Visualization vis;
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -47,6 +55,13 @@ public class Controller {
 
         //Clear status label
         statusLabel.setText("");
+
+        ObservableList<String> visTypes = FXCollections.observableArrayList();
+        visTypes.add("Orthogonal Slices");
+        visTypes.add("MIP");
+        visTypeCombo.setItems(visTypes);
+        visTypeCombo.setValue(visTypes.get(1));
+
 
     }
 
@@ -65,8 +80,7 @@ public class Controller {
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
-        renderer = new Renderer(vtkPane);
-        renderer.render();
+        doVis();
 
 
     }
@@ -75,12 +89,27 @@ public class Controller {
 
         String path = "data\\BRAINIX\\sT2W-FLAIR - 401";
         img = DicomUtil.readDicom(path);
-        dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1,path.length()));
+        dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
+        doVis();
 
-        renderer = new OrthogonalSliceRenderer(vtkPane,img);
-        renderer.render();
+    }
+
+    public void doVis() {
+
+        if (img != null) {
+
+            if (visTypeCombo.getValue().equals("Orthogonal Slices")) {
+                vis = new OrthogonalSlicesVisualization(vtkPane, img);
+            } else if (visTypeCombo.getValue().equals("MIP")) {
+                vis = new MIPVisualization(vtkPane, img);
+            }
+
+            settingsPane.getChildren().setAll(vis.getVisSettings());
+            vis.getRenderer().render();
+
+        }
 
     }
 

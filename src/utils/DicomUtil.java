@@ -1,5 +1,8 @@
 package utils;
 
+import org.itk.simple.Image;
+import org.itk.simple.ImageSeriesReader;
+import org.itk.simple.VectorString;
 import vtk.vtkDICOMImageReader;
 import vtk.vtkImageData;
 
@@ -13,5 +16,12 @@ public class DicomUtil {
         dicomReader.SetDirectoryName(path);  //only recognized thing!!!
         dicomReader.Update();
         return dicomReader.GetOutput();
+    }
+
+    public static Image readDicomSITK(String path) {
+        ImageSeriesReader dicomReader = new ImageSeriesReader();
+        VectorString fileNames = ImageSeriesReader.getGDCMSeriesFileNames(path);
+        dicomReader.setFileNames(fileNames);
+        return dicomReader.execute();
     }
 }

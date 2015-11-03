@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.paint.*?>
 <?import javafx.geometry.*?>
@@ -14,11 +15,11 @@
 
 <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="768.0" minWidth="1024.0" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Controller">
    <children>
-      <SplitPane dividerPositions="0.30039138943248533" layoutY="78.0" prefHeight="690.0" prefWidth="1024.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="78.0">
+      <SplitPane fx:id="contentPane" dividerPositions="0.3" layoutY="78.0" pickOnBounds="false" prefHeight="690.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="78.0">
         <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                <children>
-                  <VBox prefHeight="688.0" prefWidth="304.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <VBox fx:id="settingsBox" prefHeight="688.0" prefWidth="304.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <GridPane prefHeight="68.0" prefWidth="294.0">
                           <columnConstraints>
@@ -45,9 +46,10 @@
                                     <Insets left="5.0" />
                                  </padding>
                               </Label>
-                              <ComboBox fx:id="visTypeCombo" prefWidth="182.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ComboBox fx:id="visTypeCombo" onAction="#doVis" prefWidth="182.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
+                        <AnchorPane fx:id="settingsPane" prefHeight="610.0" prefWidth="294.0" />
                      </children>
                      <opaqueInsets>
                         <Insets />

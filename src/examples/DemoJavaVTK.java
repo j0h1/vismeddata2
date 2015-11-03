@@ -65,7 +65,7 @@ public class DemoJavaVTK extends JPanel implements ActionListener
         vtkNativeLibrary.DisableOutputWindow(null);
     }
 
-    /* Constructor - generates visualization pipeline and adds actors*/
+    /* Constructor - generates renderer pipeline and adds actors*/
     public DemoJavaVTK() 
     {
         super(new BorderLayout()); /* large center and small border areas*/
