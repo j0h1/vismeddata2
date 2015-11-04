@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
@@ -65,7 +66,10 @@
                 <Font name="System Italic" size="18.0" />
             </font>
         </Label>
-        <Label fx:id="statusLabel" layoutX="660.0" layoutY="38.0" prefHeight="17.0" prefWidth="171.0" text="NO_STATUS_DEFINED" AnchorPane.rightAnchor="193.0" />
+        <Label fx:id="statusLabel" layoutX="659.0" layoutY="38.0" prefHeight="17.0" prefWidth="171.0" text="NO_STATUS_DEFINED" AnchorPane.rightAnchor="194.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font></Label>
       <HBox layoutX="839.0" layoutY="33.0" prefHeight="27.0" prefWidth="171.0" spacing="10.0" AnchorPane.rightAnchor="14.0">
          <children>
               <Button fx:id="quickButton" mnemonicParsing="false" onAction="#quickLoad" text="Quick Load" />

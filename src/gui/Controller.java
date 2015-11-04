@@ -17,6 +17,7 @@ import javafx.util.Duration;
 import dicom.DicomUtil;
 import visualizations.MIPVisualization;
 import visualizations.OrthogonalSlicesVisualization;
+import visualizations.TFVisualization;
 import visualizations.Visualization;
 
 import java.io.File;
@@ -57,6 +58,7 @@ public class Controller {
         ObservableList<String> visTypes = FXCollections.observableArrayList();
         visTypes.add("Orthogonal Slices");
         visTypes.add("MIP");
+        visTypes.add("Transfer Function");
         visTypeCombo.setItems(visTypes);
         visTypeCombo.setValue(visTypes.get(1));
 
@@ -104,6 +106,8 @@ public class Controller {
                 vis = new OrthogonalSlicesVisualization(vtkPane, dicomImage);
             } else if (visTypeCombo.getValue().equals("MIP")) {
                 vis = new MIPVisualization(vtkPane, dicomImage);
+            } else if (visTypeCombo.getValue().equals("Transfer Function")) {
+                vis = new TFVisualization(vtkPane, dicomImage);
             }
 
             settingsPane.getChildren().setAll(vis.getVisSettings());
