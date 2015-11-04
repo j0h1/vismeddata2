@@ -6,6 +6,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import vtk.vtkImageData;
@@ -43,7 +44,7 @@ public class MIPRenderer implements Renderer {
         }
 
         this.renderPane = renderPane;
-        this.canvas = new Canvas(renderPane.getWidth(),renderPane.getHeight());
+        this.canvas = new Canvas(imgDims[0],imgDims[1]);
         this.gc = canvas.getGraphicsContext2D();
 
     }
@@ -55,8 +56,8 @@ public class MIPRenderer implements Renderer {
         gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
 
         //Offset for image centering
-        int offsetX = (int)(canvas.getWidth()*0.5-imgDims[0]*0.5);
-        int offsetY = (int)(canvas.getHeight()*0.5-imgDims[1]*0.5);
+        //int offsetX = (int)(canvas.getWidth()*0.5-imgDims[0]*0.5);
+        //int offsetY = (int)(canvas.getHeight()*0.5-imgDims[1]*0.5);
         PixelWriter pw = gc.getPixelWriter();
 
         for (int x = 0; x < imgDims[0]; x++) {
@@ -71,15 +72,13 @@ public class MIPRenderer implements Renderer {
                         curMax = pixelVal;
                     }
                 }
-                pw.setColor(offsetX+x, offsetY+y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
+                pw.setColor(x, y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
             }
         }
 
-        
-        //ImageView iView = new ImageView();
-        //iView.setImage();
+        ImageView iView = RenderUtil.canvasToImageView(canvas, canvas.getWidth(), canvas.getHeight(), true);
 
-        renderPane.getChildren().setAll(canvas);
+        renderPane.getChildren().setAll(iView);
 
     }
 }
