@@ -49,7 +49,7 @@ public class OrthogonalSlicesVisualization implements Visualization {
             public void changed(ObservableValue<? extends Number> ov,
                                 Number old_val, Number new_val) {
                 renderer.selectZ(new_val.intValue());
-                renderer.render();
+                renderer.renderXY();
             }
         });
 
@@ -68,6 +68,14 @@ public class OrthogonalSlicesVisualization implements Visualization {
         labelY.setText("Select Y: ");
         labelY.setLabelFor(slideY);
 
+        slideY.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue<? extends Number> ov,
+                                Number old_val, Number new_val) {
+                renderer.selectY(new_val.intValue());
+                renderer.renderXZ();
+            }
+        });
+
         pane.add(labelY, 0, 1);
         pane.add(slideY, 1, 1);
 
@@ -81,6 +89,14 @@ public class OrthogonalSlicesVisualization implements Visualization {
         Label labelX = new Label();
         labelX.setText("Select X: ");
         labelX.setLabelFor(slideX);
+
+        slideZ.valueProperty().addListener(new ChangeListener<Number>() {
+            public void changed(ObservableValue<? extends Number> ov,
+                                Number old_val, Number new_val) {
+                renderer.selectX(new_val.intValue());
+                renderer.renderYZ();
+            }
+        });
 
         pane.add(labelX,0,2);
         pane.add(slideX,1,2);

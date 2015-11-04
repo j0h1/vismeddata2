@@ -60,6 +60,8 @@ public class Controller {
         visTypeCombo.setItems(visTypes);
         visTypeCombo.setValue(visTypes.get(1));
 
+        vtkPane.setStyle("-fx-background-color: black;");
+
 
     }
 
