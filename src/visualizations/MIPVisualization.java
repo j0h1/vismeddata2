@@ -1,5 +1,6 @@
 package visualizations;
 
+import dicom.DicomImage;
 import javafx.scene.layout.Pane;
 import renderer.MIPRenderer;
 import renderer.Renderer;
@@ -12,8 +13,8 @@ public class MIPVisualization implements Visualization {
 
     private MIPRenderer renderer;
 
-    public MIPVisualization(Pane pane, vtkImageData img) {
-        this.renderer = new MIPRenderer(pane,img);
+    public MIPVisualization(Pane pane, DicomImage dicomImage) {
+        this.renderer = new MIPRenderer(pane,dicomImage);
     }
 
     @Override

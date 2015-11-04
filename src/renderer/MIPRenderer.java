@@ -1,7 +1,10 @@
 package renderer;
 
+import dicom.DicomImage;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -20,9 +23,9 @@ public class MIPRenderer implements Renderer {
     protected Canvas canvas;
     protected GraphicsContext gc;
 
-    public MIPRenderer(Pane renderPane, vtkImageData img) {
+    public MIPRenderer(Pane renderPane, DicomImage dicomImage) {
 
-        this.img = img;
+        this.img = dicomImage.getImageData();
         this.imgDims = img.GetDimensions();
 
         imgMax = Double.MIN_VALUE;
@@ -71,6 +74,10 @@ public class MIPRenderer implements Renderer {
                 pw.setColor(offsetX+x, offsetY+y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
             }
         }
+
+        
+        //ImageView iView = new ImageView();
+        //iView.setImage();
 
         renderPane.getChildren().setAll(canvas);
 

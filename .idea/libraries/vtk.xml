@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="vtk">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/vtk.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/pixelmed.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/simpleitk-0.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/vtk.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/simpleitk-source-0.9.0.jar!/" />
+    </SOURCES>
+  </library>
+</component>

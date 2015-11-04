@@ -1,5 +1,6 @@
 package gui;
 
+import dicom.DicomImage;
 import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,18 +9,15 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import utils.DicomUtil;
-import visualizations.BlankVisualization;
+import dicom.DicomUtil;
 import visualizations.MIPVisualization;
 import visualizations.OrthogonalSlicesVisualization;
 import visualizations.Visualization;
-import vtk.vtkImageData;
 
 import java.io.File;
 
@@ -43,7 +41,7 @@ public class Controller {
     private AnchorPane settingsPane;
 
     private Stage stage;
-    private vtkImageData img;
+    private DicomImage dicomImage;
     private Visualization vis;
 
     public void setStage(Stage stage) {
@@ -76,7 +74,7 @@ public class Controller {
         String path = selectedDirectory.getPath();
 
         //DicomUtil load
-        img = DicomUtil.readDicom(path);
+        dicomImage = DicomUtil.readDicom(path);
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
@@ -88,7 +86,7 @@ public class Controller {
     public void quickLoad() {
 
         String path = "data\\BRAINIX\\sT2W-FLAIR - 401";
-        img = DicomUtil.readDicom(path);
+        dicomImage = DicomUtil.readDicom(path);
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
@@ -98,12 +96,12 @@ public class Controller {
 
     public void doVis() {
 
-        if (img != null) {
+        if (dicomImage != null) {
 
             if (visTypeCombo.getValue().equals("Orthogonal Slices")) {
-                vis = new OrthogonalSlicesVisualization(vtkPane, img);
+                vis = new OrthogonalSlicesVisualization(vtkPane, dicomImage);
             } else if (visTypeCombo.getValue().equals("MIP")) {
-                vis = new MIPVisualization(vtkPane, img);
+                vis = new MIPVisualization(vtkPane, dicomImage);
             }
 
             settingsPane.getChildren().setAll(vis.getVisSettings());
