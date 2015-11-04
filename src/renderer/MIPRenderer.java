@@ -7,6 +7,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import vtk.vtkImageData;
@@ -20,11 +21,11 @@ public class MIPRenderer implements Renderer {
     private double imgMax;
     private int imgDims[];
 
-    private Pane renderPane;
+    private AnchorPane renderPane;
     protected Canvas canvas;
     protected GraphicsContext gc;
 
-    public MIPRenderer(Pane renderPane, DicomImage dicomImage) {
+    public MIPRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
         this.img = dicomImage.getImageData();
         this.imgDims = img.GetDimensions();
@@ -52,7 +53,7 @@ public class MIPRenderer implements Renderer {
 
     @Override
     public void render() {
-
+        
         gc.setFill(Color.BLACK);
         gc.fillRect(0,0,canvas.getWidth(),canvas.getHeight());
 
@@ -77,7 +78,7 @@ public class MIPRenderer implements Renderer {
             }
         }
 
-        ImageView iView = RenderUtil.canvasToImageView(canvas, canvas.getWidth(), canvas.getHeight(), true);
+        ImageView iView = RenderUtil.canvasToImageView(canvas, renderPane, true);
 
         renderPane.getChildren().setAll(iView);
 

@@ -107,15 +107,26 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public synchronized void render() {
 
-        for (int i = 0; i < 3; i++) {
+        renderPane.getChildren().setAll();
 
-            //Fill background
-            canvasArr[i].getGraphicsContext2D().setFill(Color.BLACK);
-            canvasArr[i].getGraphicsContext2D().fillRect(0, 0, canvasArr[i].getWidth(), canvasArr[i].getHeight());
+        //Set vis positions on pane
+        renderPane.setTopAnchor(canvasArr[0], 0.0);
+        renderPane.setLeftAnchor(canvasArr[0], 0.0);
+        renderPane.setTopAnchor(canvasArr[1], 0.0);
+        renderPane.setRightAnchor(canvasArr[1], 0.0);
+        renderPane.setBottomAnchor(canvasArr[2],0.0);
+        renderPane.setLeftAnchor(canvasArr[2],0.0);
 
-        }
+        //Render
+        renderXY();
+        renderXZ();
+        renderYZ();
 
-        //XY
+    }
+
+    public void renderXY() {
+
+        //Draw on canvas
         PixelWriter pw = canvasArr[0].getGraphicsContext2D().getPixelWriter();
         for (int x = 0; x < imgDims[0];x++) {
             for (int y = 0; y < imgDims[1];y++) {
@@ -124,35 +135,51 @@ public class OrthogonalSlicesRenderer implements Renderer {
             }
         }
 
-        //XZ
-        PixelWriter pw2 = canvasArr[1].getGraphicsContext2D().getPixelWriter();
+        //Refresh UI
+        if (renderPane.getChildren().size() == 3) {
+            renderPane.getChildren().set(0,canvasArr[0]);
+        } else {
+            renderPane.getChildren().add(canvasArr[0]);
+        }
+    }
+
+    public void renderXZ() {
+
+        //Draw on canvas
+        PixelWriter pw = canvasArr[1].getGraphicsContext2D().getPixelWriter();
         for (int x = 0; x < imgDims[0];x++) {
             for (int z = 0; z < imgDims[2];z++) {
                 double pixelVal = img.GetScalarComponentAsDouble(x,selectedY,z,0);
-                pw2.setColor(x,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
+                pw.setColor(x,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
             }
         }
 
-        //YZ
-        PixelWriter pw3 = canvasArr[2].getGraphicsContext2D().getPixelWriter();
+        //Refresh UI
+        if (renderPane.getChildren().size() == 3) {
+            renderPane.getChildren().set(1,canvasArr[1]);
+        } else {
+            renderPane.getChildren().add(canvasArr[1]);
+        }
+
+    }
+
+    public void renderYZ() {
+
+        //Draw on canvas
+        PixelWriter pw = canvasArr[2].getGraphicsContext2D().getPixelWriter();
         for (int y = 0; y < imgDims[1];y++) {
             for (int z = 0; z < imgDims[2];z++) {
                 double pixelVal = img.GetScalarComponentAsDouble(selectedX,y,z,0);
-                pw3.setColor(y,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
+                pw.setColor(y,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
             }
         }
 
-        //Set vis
-        renderPane.setTopAnchor(canvasArr[0],0.0);
-        renderPane.setLeftAnchor(canvasArr[0], 0.0);
-        renderPane.setTopAnchor(canvasArr[1], 0.0);
-        renderPane.setRightAnchor(canvasArr[1], 0.0);
-        renderPane.setBottomAnchor(canvasArr[2],0.0);
-        renderPane.setLeftAnchor(canvasArr[2],0.0);
-        renderPane.getChildren().setAll(canvasArr[0], canvasArr[1], canvasArr[2]);
-
-
-
+        //Refresh UI
+        if (renderPane.getChildren().size() == 3) {
+            renderPane.getChildren().set(2,canvasArr[2]);
+        } else {
+            renderPane.getChildren().add(canvasArr[2]);
+        }
     }
 
 
