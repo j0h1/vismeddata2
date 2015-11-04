@@ -2,9 +2,11 @@ package renderer;
 
 import dicom.DicomImage;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import vtk.vtkDataArray;
 import vtk.vtkImageData;
 import vtk.vtkImageReslice;
 
@@ -16,60 +18,34 @@ public class OrthogonalSlicesRenderer implements Renderer {
     private AnchorPane renderPane;
     protected Canvas[] canvasArr;
 
-    private vtkImageData img;
-    private double imgMax;
+    private DicomImage img;
 
+    private int[] imgDims;
     private int selectedX;
     private int selectedY;
     private int selectedZ;
-    private int[] imgDims;
 
     public OrthogonalSlicesRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
-        System.out.println("OrthogonalSlicesRenderer init.");
-        int[] tempDims = dicomImage.getImageData().GetDimensions();
-        double[] spacing = dicomImage.getImageData().GetSpacing();
-        System.out.println("\tSpacing: "+spacing[0] +", "+spacing[1]+", "+spacing[2]);
-
-        /*double newZSpacing = spacing[2]*(spacing[2]/spacing[0]);
-        System.out.println("\tNew estimate for spacingZ: "+newZSpacing);
-        vtkImageReslice reslicer = new vtkImageReslice();
-        reslicer.SetInputConnection(dicomImage.getImagePort());
-        reslicer.SetOutputSpacing(spacing[0],spacing[0],newZSpacing);
-        reslicer.SetInterpolationModeToCubic();
-        reslicer.Update();
-
-        this.img = reslicer.GetOutput();*/
-
-        this.img = dicomImage.getImageData();
-        imgDims = img.GetDimensions();
-        System.out.println("\tDimensions: "+imgDims[0] +", "+imgDims[1]+", "+imgDims[2]);
-
+        this.img = dicomImage;
+        imgDims = dicomImage.getDimensions();
         this.renderPane = renderPane;
-        this.canvasArr = new Canvas[3];
 
+        //Create 3 canvases for rendering from every direction
+        this.canvasArr = new Canvas[3];
         canvasArr[0] = new Canvas(imgDims[0],imgDims[1]); //XY
         canvasArr[1] = new Canvas(imgDims[0],imgDims[2]); //XZ
         canvasArr[2] = new Canvas(imgDims[1],imgDims[2]); //YZ
 
-        imgMax = Double.MIN_VALUE;
-        for (int x = 0; x < imgDims[0]; x++) {
-            for (int y = 0; y < imgDims[1]; y++) {
-                for (int z = 0; z < imgDims[2]; z++) {
-                    double pixelVal = img.GetScalarComponentAsDouble(x,y,z,0);
+        //Init slice selection with "mid slices"
+        selectedX = (int)(imgDims[0]*0.5d); //Mid X-slice
+        selectedY = (int)(imgDims[1]*0.5d); //Mid Y-slice
+        selectedZ = (int)(imgDims[2]*0.5d); //Mid Z-slice
 
-                    //Get min
-                    if (pixelVal > imgMax) {
-                        imgMax = pixelVal;
-                    }
-                }
-            }
-        }
+    }
 
-        selectedX = 0;
-        selectedY = 0;
-        selectedZ = 0;
-
+    public int getSelectedX() {
+        return selectedX;
     }
 
     public void selectX(int x) {
@@ -83,6 +59,10 @@ public class OrthogonalSlicesRenderer implements Renderer {
         return imgDims[0];
     }
 
+    public int getSelectedY() {
+        return selectedY;
+    }
+
     public void selectY(int y) {
         if (y > getMaxY()) {
             return;
@@ -92,6 +72,10 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public int getMaxY() {
         return imgDims[1];
+    }
+
+    public int getSelectedZ() {
+        return selectedZ;
     }
 
     public void selectZ(int z) {
@@ -105,17 +89,11 @@ public class OrthogonalSlicesRenderer implements Renderer {
         return imgDims[2];
     }
 
+
     public synchronized void render() {
 
+        //Clear vtkPane
         renderPane.getChildren().setAll();
-
-        //Set vis positions on pane
-        renderPane.setTopAnchor(canvasArr[0], 0.0);
-        renderPane.setLeftAnchor(canvasArr[0], 0.0);
-        renderPane.setTopAnchor(canvasArr[1], 0.0);
-        renderPane.setRightAnchor(canvasArr[1], 0.0);
-        renderPane.setBottomAnchor(canvasArr[2],0.0);
-        renderPane.setLeftAnchor(canvasArr[2],0.0);
 
         //Render
         renderXY();
@@ -126,60 +104,77 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderXY() {
 
-        //Draw on canvas
-        PixelWriter pw = canvasArr[0].getGraphicsContext2D().getPixelWriter();
-        for (int x = 0; x < imgDims[0];x++) {
-            for (int y = 0; y < imgDims[1];y++) {
-                double pixelVal = img.GetScalarComponentAsDouble(x,y,selectedZ,0);
-                pw.setColor(x,y,new Color(pixelVal/imgMax,pixelVal/imgMax,pixelVal/imgMax,1));
-            }
-        }
+        ImageView iView = renderSlice(0,1,2,selectedZ,0,false);
 
-        //Refresh UI
-        if (renderPane.getChildren().size() == 3) {
-            renderPane.getChildren().set(0,canvasArr[0]);
-        } else {
-            renderPane.getChildren().add(canvasArr[0]);
-        }
+        renderPane.setTopAnchor(iView, 0.0);
+        renderPane.setLeftAnchor(iView, 0.0);
     }
 
     public void renderXZ() {
 
-        //Draw on canvas
-        PixelWriter pw = canvasArr[1].getGraphicsContext2D().getPixelWriter();
-        for (int x = 0; x < imgDims[0];x++) {
-            for (int z = 0; z < imgDims[2];z++) {
-                double pixelVal = img.GetScalarComponentAsDouble(x,selectedY,z,0);
-                pw.setColor(x,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
-            }
-        }
+        ImageView iView = renderSlice(0,2,1,selectedY,1,true);
 
-        //Refresh UI
-        if (renderPane.getChildren().size() == 3) {
-            renderPane.getChildren().set(1,canvasArr[1]);
-        } else {
-            renderPane.getChildren().add(canvasArr[1]);
-        }
+        renderPane.setTopAnchor(iView, 0.0);
+        renderPane.setRightAnchor(iView, 0.0);
 
     }
 
     public void renderYZ() {
 
-        //Draw on canvas
-        PixelWriter pw = canvasArr[2].getGraphicsContext2D().getPixelWriter();
-        for (int y = 0; y < imgDims[1];y++) {
-            for (int z = 0; z < imgDims[2];z++) {
-                double pixelVal = img.GetScalarComponentAsDouble(selectedX,y,z,0);
-                pw.setColor(y,z,new Color(pixelVal/1024d,pixelVal/1024d,pixelVal/1024d,1));
+        ImageView iView = renderSlice(1,2,0,selectedX,2,true);
+
+        renderPane.setBottomAnchor(iView, 0.0);
+        renderPane.setLeftAnchor(iView, renderPane.getWidth()*0.5-iView.getFitWidth()*0.5);
+
+    }
+
+    /**
+     * Renders a single slice
+     * @param dim1 The first "variable" dimension e.g. 0 for "x"
+     * @param dim2 The second "variable" dimension e.g. 1 for "y"
+     * @param staticDim The static dimension which is not varied, but selected (via GUI) e.g. 3 for "z"
+     * @param selectedSlice The slice of the static dimension that is selected  e.g. 15 for slice 15
+     * @param canvasIndex The 0-2 index of the canvas to draw on
+     * @param resizeToXY Should the output ImageView be resized to have the same dimensions as the XY-view?
+     * @return ImageView containing the rendered image
+     */
+    private ImageView renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY) {
+
+        //Pixel selector, used to pass params in the correct order to img.getValue()
+        int[] pixelSelector = new int[3];
+        pixelSelector[staticDim] = selectedSlice;
+
+        //Draw on canvas, create a local copy of maxValue on stack
+        PixelWriter pw = canvasArr[canvasIndex].getGraphicsContext2D().getPixelWriter();
+        double imgMax = img.getMaxValue();
+
+        for (int i = 0; i < imgDims[dim1];i++) {
+            for (int j = 0; j < imgDims[dim2];j++) {
+                pixelSelector[dim1] = i;
+                pixelSelector[dim2] = j;
+                double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
+                pw.setColor(i, j, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
             }
         }
 
-        //Refresh UI
-        if (renderPane.getChildren().size() == 3) {
-            renderPane.getChildren().set(2,canvasArr[2]);
-        } else {
-            renderPane.getChildren().add(canvasArr[2]);
+        //Create imageView from canvas
+        ImageView iView = RenderUtil.canvasToImageView(canvasArr[canvasIndex],renderPane,false,false);
+
+        //Resize image to dimension of XY-view, if wanted
+        if (resizeToXY) {
+            iView.setFitWidth(imgDims[0]);
+            iView.setFitHeight(imgDims[1]);
         }
+
+        //If not rendered "for the first time" (size!=3) add view, else set new
+        if (renderPane.getChildren().size() == 3) {
+            renderPane.getChildren().set(canvasIndex,iView);
+        } else {
+            renderPane.getChildren().add(iView);
+        }
+
+        return iView;
+
     }
 
 

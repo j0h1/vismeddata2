@@ -41,6 +41,7 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideZ.setMajorTickUnit((double)renderer.getMaxZ()/10d);
         slideZ.setMinorTickCount(1);
         slideZ.setShowTickLabels(true);
+        slideZ.setValue(renderer.getSelectedZ());
         Label labelZ = new Label();
         labelZ.setText("Select Z: ");
         labelZ.setLabelFor(slideZ);
@@ -64,6 +65,7 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideY.setMajorTickUnit((double)renderer.getMaxY()/10d);
         slideY.setMinorTickCount(1);
         slideY.setShowTickLabels(true);
+        slideY.setValue(renderer.getSelectedY());
         Label labelY = new Label();
         labelY.setText("Select Y: ");
         labelY.setLabelFor(slideY);
@@ -86,11 +88,12 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideX.setMajorTickUnit((double)renderer.getMaxX()/10d);
         slideX.setMinorTickCount(1);
         slideX.setShowTickLabels(true);
+        slideX.setValue(renderer.getSelectedX());
         Label labelX = new Label();
         labelX.setText("Select X: ");
         labelX.setLabelFor(slideX);
 
-        slideZ.valueProperty().addListener(new ChangeListener<Number>() {
+        slideX.valueProperty().addListener(new ChangeListener<Number>() {
             public void changed(ObservableValue<? extends Number> ov,
                                 Number old_val, Number new_val) {
                 renderer.selectX(new_val.intValue());

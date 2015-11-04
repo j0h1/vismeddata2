@@ -10,14 +10,14 @@ import javafx.scene.layout.Pane;
  */
 public class RenderUtil {
 
-    public static ImageView canvasToImageView(Canvas canvas, Pane pane, boolean autoresize) {
+    public static ImageView canvasToImageView(Canvas canvas, Pane pane, boolean preserveRatio, boolean autoResize) {
         WritableImage wImg = new WritableImage((int)canvas.getWidth(),(int)canvas.getHeight());
         canvas.snapshot(null, wImg);
         ImageView iView = new ImageView();
         iView.setImage(wImg);
-        iView.setPreserveRatio(true);
+        iView.setPreserveRatio(preserveRatio);
 
-        if (autoresize) {
+        if (autoResize) {
             iView.fitWidthProperty().bind(pane.widthProperty());
             iView.fitHeightProperty().bind(pane.heightProperty());
         }
