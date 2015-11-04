@@ -1,5 +1,6 @@
 package visualizations;
 
+import dicom.DicomImage;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
@@ -10,7 +11,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import renderer.OrthogonalSlicesRenderer;
 import renderer.Renderer;
-import vtk.vtkImageData;
 
 
 /**
@@ -20,8 +20,8 @@ public class OrthogonalSlicesVisualization implements Visualization {
 
     private OrthogonalSlicesRenderer renderer;
 
-    public OrthogonalSlicesVisualization(AnchorPane pane, vtkImageData img) {
-        this.renderer = new OrthogonalSlicesRenderer(pane,img);
+    public OrthogonalSlicesVisualization(AnchorPane pane, DicomImage dicomImage) {
+        this.renderer = new OrthogonalSlicesRenderer(pane,dicomImage);
     }
 
     @Override

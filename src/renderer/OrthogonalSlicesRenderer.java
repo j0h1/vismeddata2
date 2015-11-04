@@ -1,10 +1,12 @@
 package renderer;
 
+import dicom.DicomImage;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import vtk.vtkImageData;
+import vtk.vtkImageReslice;
 
 /**
  * Created by felix on 03.11.2015.
@@ -22,11 +24,26 @@ public class OrthogonalSlicesRenderer implements Renderer {
     private int selectedZ;
     private int[] imgDims;
 
-    public OrthogonalSlicesRenderer(AnchorPane renderPane, vtkImageData img) {
+    public OrthogonalSlicesRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
-        this.img = img;
+        System.out.println("OrthogonalSlicesRenderer init.");
+        int[] tempDims = dicomImage.getImageData().GetDimensions();
+        double[] spacing = dicomImage.getImageData().GetSpacing();
+        System.out.println("\tSpacing: "+spacing[0] +", "+spacing[1]+", "+spacing[2]);
+
+        /*double newZSpacing = spacing[2]*(spacing[2]/spacing[0]);
+        System.out.println("\tNew estimate for spacingZ: "+newZSpacing);
+        vtkImageReslice reslicer = new vtkImageReslice();
+        reslicer.SetInputConnection(dicomImage.getImagePort());
+        reslicer.SetOutputSpacing(spacing[0],spacing[0],newZSpacing);
+        reslicer.SetInterpolationModeToCubic();
+        reslicer.Update();
+
+        this.img = reslicer.GetOutput();*/
+
+        this.img = dicomImage.getImageData();
         imgDims = img.GetDimensions();
-        System.out.println("OrthogonalSlicesRenderer init.\n\tDimensions: "+imgDims[0] +", "+imgDims[1]+", "+imgDims[2]);
+        System.out.println("\tDimensions: "+imgDims[0] +", "+imgDims[1]+", "+imgDims[2]);
 
         this.renderPane = renderPane;
         this.canvasArr = new Canvas[3];
