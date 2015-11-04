@@ -35,6 +35,7 @@ public class MIPRenderer implements Renderer {
                 for (int z = 0; z < imgDims[2]; z++) {
                     double pixelVal = img.GetScalarComponentAsDouble(x,y,z,0);
 
+
                     //Get max
                     if (pixelVal > imgMax) {
                         imgMax = pixelVal;
