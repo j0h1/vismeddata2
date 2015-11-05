@@ -1,13 +1,17 @@
 package renderer;
 
 import dicom.DicomImage;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 /**
  * Created by felix on 03.11.2015.
@@ -35,9 +39,9 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         //Create 3 canvases for rendering from every direction
         this.canvasArr = new Canvas[3];
-        canvasArr[0] = new Canvas(imgDims[0],imgDims[1]+10); //XY, +10 for vis title ;)
-        canvasArr[1] = new Canvas(imgDims[0],imgDims[2]+10); //XZ
-        canvasArr[2] = new Canvas(imgDims[1],imgDims[2]+10); //YZ
+        canvasArr[0] = new Canvas(imgDims[0],imgDims[1]); //XY
+        canvasArr[1] = new Canvas(imgDims[0],imgDims[2]); //XZ
+        canvasArr[2] = new Canvas(imgDims[1],imgDims[2]); //YZ
 
         //Init slice selection with "mid slices"
         selectedX = (int)(imgDims[0]*0.5d); //Mid X-slice
@@ -125,22 +129,22 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderXY() {
 
-        ImageView iView = renderSlice(0,1,2,selectedZ,0,false,"XY");
+        Node fxNode = renderSlice(0,1,2,selectedZ,0,false,"XY");
 
-        renderPane.setTopAnchor(iView, 5.0);
-        renderPane.setLeftAnchor(iView, 5.0);
+        renderPane.setTopAnchor(fxNode, 5.0);
+        renderPane.setLeftAnchor(fxNode, 5.0);
     }
 
     public void renderXZ() {
 
-        ImageView iView = renderSlice(0,2,1,selectedY,1,doScale,"XZ");
+        Node fxNode = renderSlice(0,2,1,selectedY,1,doScale,"XZ");
 
         if (doScale) {
-            renderPane.setTopAnchor(iView, 5.0);
-            renderPane.setRightAnchor(iView, 5.0);
+            renderPane.setTopAnchor(fxNode, 5.0);
+            renderPane.setRightAnchor(fxNode, 5.0);
         } else {
-            renderPane.setTopAnchor(iView,imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
-            renderPane.setRightAnchor(iView,imgDims[1]*0.5d-canvasArr[1].getWidth()*0.5d);
+            renderPane.setTopAnchor(fxNode,imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
+            renderPane.setRightAnchor(fxNode,imgDims[1]*0.5d-canvasArr[1].getWidth()*0.5d);
         }
 
 
@@ -148,14 +152,14 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderYZ() {
 
-        ImageView iView = renderSlice(1,2,0,selectedX,2,doScale,"YZ");
+        Node fxNode = renderSlice(1,2,0,selectedX,2,doScale,"YZ");
 
         if (doScale) {
-            renderPane.setBottomAnchor(iView, 5.0);
-            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - iView.getFitWidth() * 0.5);
+            renderPane.setBottomAnchor(fxNode, 5.0);
+            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - fxNode.getBoundsInParent().getWidth()*0.5d);
         } else {
-            renderPane.setBottomAnchor(iView, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
-            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
+            renderPane.setBottomAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
+            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
         }
 
 
@@ -172,7 +176,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
      * @param title title of the view
      * @return ImageView containing the rendered image
      */
-    private ImageView renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY, String title) {
+    private Node renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY, String title) {
 
         //Pixel selector, used to pass params in the correct order to img.getValue()
         int[] pixelSelector = new int[3];
@@ -188,16 +192,8 @@ public class OrthogonalSlicesRenderer implements Renderer {
                 pixelSelector[dim1] = i;
                 pixelSelector[dim2] = j; //title offset
                 double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
-                pw.setColor(i, j+10, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
+                pw.setColor(i, j, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
             }
-        }
-
-        gc.setFill(Color.BLACK);
-        gc.fillRect(0,0,canvasArr[canvasIndex].getWidth(),10);
-        if (showTitles) {
-            gc.setFill(Color.GREEN);
-            gc.setFont(Font.font("Verdana", 10));
-            gc.fillText(title+" slice: "+(selectedSlice+1), 2, 10);
         }
 
         //Create imageView from canvas
@@ -209,14 +205,30 @@ public class OrthogonalSlicesRenderer implements Renderer {
             iView.setFitHeight(imgDims[1]);
         }
 
-        //If not rendered "for the first time" (size!=3) add view, else set new
-        if (renderPane.getChildren().size() == 3) {
-            renderPane.getChildren().set(canvasIndex,iView);
+        Node fxNode;
+        if (showTitles) {
+            StackPane stackPane = new StackPane();
+            stackPane.setPrefHeight(iView.getFitHeight());
+            stackPane.setPrefWidth(iView.getFitWidth());
+            Text titleLabel = new Text(title + " slice: "+(selectedSlice+1));
+            titleLabel.setFont(Font.font("Verdana", 10));
+            titleLabel.setFill(Color.LIGHTGREEN);
+            stackPane.getChildren().add(iView);
+            stackPane.setAlignment(Pos.TOP_LEFT);
+            stackPane.getChildren().add(titleLabel);
+            fxNode = stackPane;
         } else {
-            renderPane.getChildren().add(iView);
+            fxNode = iView;
         }
 
-        return iView;
+        //If not rendered "for the first time" (size!=3) add view, else set new
+        if (renderPane.getChildren().size() == 3) {
+            renderPane.getChildren().set(canvasIndex,fxNode);
+        } else {
+            renderPane.getChildren().add(fxNode);
+        }
+
+        return fxNode;
 
     }
 
