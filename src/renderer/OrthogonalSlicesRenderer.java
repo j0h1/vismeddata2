@@ -2,13 +2,12 @@ package renderer;
 
 import dicom.DicomImage;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import vtk.vtkDataArray;
-import vtk.vtkImageData;
-import vtk.vtkImageReslice;
+import javafx.scene.text.Font;
 
 /**
  * Created by felix on 03.11.2015.
@@ -25,6 +24,9 @@ public class OrthogonalSlicesRenderer implements Renderer {
     private int selectedY;
     private int selectedZ;
 
+    private boolean showTitles;
+    private boolean doScale;
+
     public OrthogonalSlicesRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
         this.img = dicomImage;
@@ -33,14 +35,18 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         //Create 3 canvases for rendering from every direction
         this.canvasArr = new Canvas[3];
-        canvasArr[0] = new Canvas(imgDims[0],imgDims[1]); //XY
-        canvasArr[1] = new Canvas(imgDims[0],imgDims[2]); //XZ
-        canvasArr[2] = new Canvas(imgDims[1],imgDims[2]); //YZ
+        canvasArr[0] = new Canvas(imgDims[0],imgDims[1]+10); //XY, +10 for vis title ;)
+        canvasArr[1] = new Canvas(imgDims[0],imgDims[2]+10); //XZ
+        canvasArr[2] = new Canvas(imgDims[1],imgDims[2]+10); //YZ
 
         //Init slice selection with "mid slices"
         selectedX = (int)(imgDims[0]*0.5d); //Mid X-slice
         selectedY = (int)(imgDims[1]*0.5d); //Mid Y-slice
         selectedZ = (int)(imgDims[2]*0.5d); //Mid Z-slice
+
+        //Per defaults titles are shown, but no scaling
+        showTitles = true;
+        doScale = true;
 
     }
 
@@ -89,6 +95,21 @@ public class OrthogonalSlicesRenderer implements Renderer {
         return imgDims[2];
     }
 
+    public boolean showTitles() {
+        return showTitles;
+    }
+
+    public void setShowTitles(boolean showTitles) {
+        this.showTitles = showTitles;
+    }
+
+    public boolean isScaling() {
+        return doScale;
+    }
+
+    public void setScaling(boolean doScale) {
+        this.doScale = doScale;
+    }
 
     public synchronized void render() {
 
@@ -104,27 +125,39 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderXY() {
 
-        ImageView iView = renderSlice(0,1,2,selectedZ,0,false);
+        ImageView iView = renderSlice(0,1,2,selectedZ,0,false,"XY");
 
-        renderPane.setTopAnchor(iView, 0.0);
-        renderPane.setLeftAnchor(iView, 0.0);
+        renderPane.setTopAnchor(iView, 5.0);
+        renderPane.setLeftAnchor(iView, 5.0);
     }
 
     public void renderXZ() {
 
-        ImageView iView = renderSlice(0,2,1,selectedY,1,true);
+        ImageView iView = renderSlice(0,2,1,selectedY,1,doScale,"XZ");
 
-        renderPane.setTopAnchor(iView, 0.0);
-        renderPane.setRightAnchor(iView, 0.0);
+        if (doScale) {
+            renderPane.setTopAnchor(iView, 5.0);
+            renderPane.setRightAnchor(iView, 5.0);
+        } else {
+            renderPane.setTopAnchor(iView,imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
+            renderPane.setRightAnchor(iView,imgDims[1]*0.5d-canvasArr[1].getWidth()*0.5d);
+        }
+
 
     }
 
     public void renderYZ() {
 
-        ImageView iView = renderSlice(1,2,0,selectedX,2,true);
+        ImageView iView = renderSlice(1,2,0,selectedX,2,doScale,"YZ");
 
-        renderPane.setBottomAnchor(iView, 0.0);
-        renderPane.setLeftAnchor(iView, renderPane.getWidth()*0.5-iView.getFitWidth()*0.5);
+        if (doScale) {
+            renderPane.setBottomAnchor(iView, 5.0);
+            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - iView.getFitWidth() * 0.5);
+        } else {
+            renderPane.setBottomAnchor(iView, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
+            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
+        }
+
 
     }
 
@@ -136,25 +169,35 @@ public class OrthogonalSlicesRenderer implements Renderer {
      * @param selectedSlice The slice of the static dimension that is selected  e.g. 15 for slice 15
      * @param canvasIndex The 0-2 index of the canvas to draw on
      * @param resizeToXY Should the output ImageView be resized to have the same dimensions as the XY-view?
+     * @param title title of the view
      * @return ImageView containing the rendered image
      */
-    private ImageView renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY) {
+    private ImageView renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY, String title) {
 
         //Pixel selector, used to pass params in the correct order to img.getValue()
         int[] pixelSelector = new int[3];
         pixelSelector[staticDim] = selectedSlice;
 
         //Draw on canvas, create a local copy of maxValue on stack
-        PixelWriter pw = canvasArr[canvasIndex].getGraphicsContext2D().getPixelWriter();
+        GraphicsContext gc = canvasArr[canvasIndex].getGraphicsContext2D();
+        PixelWriter pw = gc.getPixelWriter();
         double imgMax = img.getMaxValue();
 
         for (int i = 0; i < imgDims[dim1];i++) {
             for (int j = 0; j < imgDims[dim2];j++) {
                 pixelSelector[dim1] = i;
-                pixelSelector[dim2] = j;
+                pixelSelector[dim2] = j; //title offset
                 double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
-                pw.setColor(i, j, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
+                pw.setColor(i, j+10, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
             }
+        }
+
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0,0,canvasArr[canvasIndex].getWidth(),10);
+        if (showTitles) {
+            gc.setFill(Color.GREEN);
+            gc.setFont(Font.font("Verdana", 10));
+            gc.fillText(title+" slice: "+(selectedSlice+1), 2, 10);
         }
 
         //Create imageView from canvas

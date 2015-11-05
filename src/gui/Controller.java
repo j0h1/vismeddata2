@@ -78,6 +78,7 @@ public class Controller {
         String path = selectedDirectory.getPath();
 
         //DicomUtil load
+        updateStatus("Loading ...",null,null);
         dicomImage = DicomUtil.readDicom(path);
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
@@ -90,6 +91,7 @@ public class Controller {
     public void quickLoad() {
 
         String path = "data\\BRAINIX\\sT2W-FLAIR - 401";
+        updateStatus("Loading ...",null,null);
         dicomImage = DicomUtil.readDicom(path);
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
@@ -117,12 +119,22 @@ public class Controller {
 
     }
 
-    private void updateStatus(String message, Color color, long duration) {
-        statusLabel.textFillProperty().setValue(color);
+    private void updateStatus(String message, Color color, Long duration) {
+
+        if (color != null) {
+            statusLabel.textFillProperty().setValue(color);
+        } else {
+            statusLabel.textFillProperty().setValue(Color.BLACK);
+        }
+
         statusLabel.setText(message);
-        FadeTransition ft = new FadeTransition(Duration.millis(duration), statusLabel);
-        ft.setFromValue(1.0);
-        ft.setToValue(0.0);
-        ft.play();
+
+        if (duration != null) {
+            FadeTransition ft = new FadeTransition(Duration.millis(duration), statusLabel);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.0);
+            ft.play();
+        }
+
     }
 }
