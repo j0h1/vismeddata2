@@ -9,8 +9,6 @@ import vtk.vtkImageData;
  */
 public class DicomImage {
 
-    private vtkImageData imageData;
-    private vtkAlgorithmOutput imagePort;
     private double maxValue;
     private double[] imgArr;
     private int[] dimensions;
@@ -20,10 +18,6 @@ public class DicomImage {
     private int dimensionZ;
 
     public DicomImage(vtkImageData imageData, vtkAlgorithmOutput imagePort) {
-
-        //Save vtk objects
-        this.imageData = imageData;
-        this.imagePort = imagePort;
 
         //Extract dimension from vtk for independence
         dimensions = imageData.GetDimensions();
@@ -65,15 +59,5 @@ public class DicomImage {
     public double getValue(int x, int y, int z) {
         return imgArr[dimensionX*dimensionY*z+dimensionX*y+x];
     }
-
-    public vtkImageData getImageData() {
-        return imageData;
-    }
-
-
-    public vtkAlgorithmOutput getImagePort() {
-        return imagePort;
-    }
-
 
 }

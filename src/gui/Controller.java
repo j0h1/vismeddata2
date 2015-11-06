@@ -1,6 +1,10 @@
 package gui;
 
 import dicom.DicomImage;
+import filter.BlankFilter;
+import filter.FilterBank;
+import filter.GaussianFilter;
+import filter.MedianFilter;
 import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,6 +43,8 @@ public class Controller {
     @FXML
     private ComboBox visTypeCombo;
     @FXML
+    private ComboBox filterTypeCombo;
+    @FXML
     private AnchorPane settingsPane;
 
     private Stage stage;
@@ -62,6 +68,13 @@ public class Controller {
         visTypeCombo.setItems(visTypes);
         visTypeCombo.setValue(visTypes.get(1));
 
+        ObservableList<String> filterTypes = FXCollections.observableArrayList();
+        filterTypes.add("None");
+        filterTypes.add("Gaussian");
+        filterTypes.add("Median");
+        filterTypeCombo.setItems(filterTypes);
+        filterTypeCombo.setValue(filterTypes.get(0));
+
         vtkPane.setStyle("-fx-background-color: black;");
 
 
@@ -77,27 +90,43 @@ public class Controller {
         File selectedDirectory = chooser.showDialog(stage);
         String path = selectedDirectory.getPath();
 
-        //DicomUtil load
-        updateStatus("Loading ...",null,null);
-        dicomImage = DicomUtil.readDicom(path);
-        dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
-        updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
-
-        doVis();
-
+        doLoad(path);
 
     }
 
     public void quickLoad() {
 
         String path = "data\\BRAINIX\\sT2W-FLAIR - 401";
+        doLoad(path);
+
+    }
+
+    public void doLoad(String path) {
+
         updateStatus("Loading ...",null,null);
         dicomImage = DicomUtil.readDicom(path);
-        dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()));
+        int[] imgDims = dicomImage.getDimensions();
+        dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()) + " ("+imgDims[0]+"x"+imgDims[1]+"x"+imgDims[2]+")");
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
         doVis();
+    }
 
+    public void changeFilter() {
+
+        if (dicomImage != null) {
+
+            if (filterTypeCombo.getValue().equals("None")) {
+                FilterBank.setFilter(new BlankFilter());
+            } else if (filterTypeCombo.getValue().equals("Gaussian")) {
+                FilterBank.setFilter(new GaussianFilter());
+            } else if (filterTypeCombo.getValue().equals("Median")) {
+                FilterBank.setFilter(new MedianFilter());
+            }
+
+            vis.getRenderer().render();
+
+        }
     }
 
     public void doVis() {

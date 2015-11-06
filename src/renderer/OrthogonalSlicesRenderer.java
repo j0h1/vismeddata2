@@ -1,7 +1,8 @@
 package renderer;
 
 import dicom.DicomImage;
-import javafx.geometry.Pos;
+import filter.Filter;
+import filter.FilterBank;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,7 +12,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 /**
  * Created by felix on 03.11.2015.
@@ -20,15 +20,15 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     private AnchorPane renderPane;
     protected Canvas[] canvasArr;
-
     private DicomImage img;
 
     private int[] imgDims;
-    private int selectedX;
-    private int selectedY;
-    private int selectedZ;
+    private Color[] viewColors;
+    private int[] selectedSlice;
+    private int[] lastSelectedSlice;
 
-    private boolean showTitles;
+    private boolean decoration;
+    private double decorationAlpha;
     private boolean doScale;
 
     public OrthogonalSlicesRenderer(AnchorPane renderPane, DicomImage dicomImage) {
@@ -44,25 +44,39 @@ public class OrthogonalSlicesRenderer implements Renderer {
         canvasArr[2] = new Canvas(imgDims[1],imgDims[2]); //YZ
 
         //Init slice selection with "mid slices"
-        selectedX = (int)(imgDims[0]*0.5d); //Mid X-slice
-        selectedY = (int)(imgDims[1]*0.5d); //Mid Y-slice
-        selectedZ = (int)(imgDims[2]*0.5d); //Mid Z-slice
+        selectedSlice = new int[3];
+        selectedSlice[0] = (int)(imgDims[0]*0.5d); //Mid X-slice
+        selectedSlice[1] = (int)(imgDims[1]*0.5d); //Mid Y-slice
+        selectedSlice[2] = (int)(imgDims[2]*0.5d); //Mid Z-slice
+
+        //Init colors
+        viewColors = new Color[3];
+        viewColors[0] = Color.BLUE; //x-slice
+        viewColors[1] = Color.GREEN; //y-slice
+        viewColors[2] = Color.RED; //z-slice
 
         //Per defaults titles are shown, but no scaling
-        showTitles = true;
+        decoration = true;
+        decorationAlpha = 1.0d;
         doScale = true;
+
+        //To avoid unnecessary re-rendering
+        lastSelectedSlice = new int[3];
+        lastSelectedSlice[0] = selectedSlice[0];
+        lastSelectedSlice[1] = selectedSlice[1];
+        lastSelectedSlice[2] = selectedSlice[2];
 
     }
 
     public int getSelectedX() {
-        return selectedX;
+        return  selectedSlice[0];
     }
 
     public void selectX(int x) {
         if (x > getMaxX()) {
             return;
         }
-        this.selectedX = Math.max(x-1,0);
+        selectedSlice[0] = Math.max(x-1,0);
     }
 
     public int getMaxX() {
@@ -70,14 +84,14 @@ public class OrthogonalSlicesRenderer implements Renderer {
     }
 
     public int getSelectedY() {
-        return selectedY;
+        return  selectedSlice[1];
     }
 
     public void selectY(int y) {
         if (y > getMaxY()) {
             return;
         }
-        this.selectedY = Math.max(y-1,0);
+        selectedSlice[1] = Math.max(y-1,0);
     }
 
     public int getMaxY() {
@@ -85,26 +99,34 @@ public class OrthogonalSlicesRenderer implements Renderer {
     }
 
     public int getSelectedZ() {
-        return selectedZ;
+        return  selectedSlice[2];
     }
 
     public void selectZ(int z) {
         if (z > getMaxZ()) {
             return;
         }
-        this.selectedZ = Math.max(z-1,0);
+        selectedSlice[2] = Math.max(z-1,0);
     }
 
     public int getMaxZ() {
         return imgDims[2];
     }
 
-    public boolean showTitles() {
-        return showTitles;
+    public boolean showDecoration() {
+        return decoration;
     }
 
-    public void setShowTitles(boolean showTitles) {
-        this.showTitles = showTitles;
+    public void setDecoration(boolean decoration) {
+        this.decoration = decoration;
+    }
+
+    public double getDecorationAlpha() {
+        return decorationAlpha;
+    }
+
+    public void setDecorationAlpha(double decorationAlpha) {
+        this.decorationAlpha = decorationAlpha;
     }
 
     public boolean isScaling() {
@@ -129,7 +151,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderXY() {
 
-        Node fxNode = renderSlice(0,1,2,selectedZ,0,false,"XY");
+        Node fxNode = renderSlice(0,1,2,0,false,"XY");
 
         renderPane.setTopAnchor(fxNode, 5.0);
         renderPane.setLeftAnchor(fxNode, 5.0);
@@ -137,7 +159,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderXZ() {
 
-        Node fxNode = renderSlice(0,2,1,selectedY,1,doScale,"XZ");
+        Node fxNode = renderSlice(0,2,1,1,doScale,"XZ");
 
         if (doScale) {
             renderPane.setTopAnchor(fxNode, 5.0);
@@ -152,7 +174,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
     public void renderYZ() {
 
-        Node fxNode = renderSlice(1,2,0,selectedX,2,doScale,"YZ");
+        Node fxNode = renderSlice(1,2,0,2,doScale,"YZ");
 
         if (doScale) {
             renderPane.setBottomAnchor(fxNode, 5.0);
@@ -170,17 +192,17 @@ public class OrthogonalSlicesRenderer implements Renderer {
      * @param dim1 The first "variable" dimension e.g. 0 for "x"
      * @param dim2 The second "variable" dimension e.g. 1 for "y"
      * @param staticDim The static dimension which is not varied, but selected (via GUI) e.g. 3 for "z"
-     * @param selectedSlice The slice of the static dimension that is selected  e.g. 15 for slice 15
      * @param canvasIndex The 0-2 index of the canvas to draw on
      * @param resizeToXY Should the output ImageView be resized to have the same dimensions as the XY-view?
      * @param title title of the view
      * @return ImageView containing the rendered image
      */
-    private Node renderSlice(int dim1, int dim2, int staticDim, int selectedSlice, int canvasIndex, boolean resizeToXY, String title) {
+    private Node renderSlice(int dim1, int dim2, int staticDim, int canvasIndex, boolean resizeToXY, String title) {
+
 
         //Pixel selector, used to pass params in the correct order to img.getValue()
         int[] pixelSelector = new int[3];
-        pixelSelector[staticDim] = selectedSlice;
+        pixelSelector[staticDim] = selectedSlice[staticDim];
 
         //Draw on canvas, create a local copy of maxValue on stack
         GraphicsContext gc = canvasArr[canvasIndex].getGraphicsContext2D();
@@ -196,6 +218,26 @@ public class OrthogonalSlicesRenderer implements Renderer {
             }
         }
 
+        //Filter
+        Filter filter = FilterBank.getFilter();
+        filter.prepare(canvasArr[canvasIndex]);
+        canvasArr[canvasIndex] = filter.execute();
+        gc = canvasArr[canvasIndex].getGraphicsContext2D();
+
+        //Draw link-lines on canvas
+        if (decoration) {
+
+            gc.setGlobalAlpha(decorationAlpha);
+            gc.setLineWidth(1.0d);
+
+            gc.setStroke(viewColors[dim1]);
+            gc.strokeLine(selectedSlice[dim1],0,selectedSlice[dim1],imgDims[dim2]);
+
+            gc.setStroke(viewColors[dim2]);
+            gc.strokeLine(0,selectedSlice[dim2],imgDims[dim1],selectedSlice[dim2]);
+
+        }
+
         //Create imageView from canvas
         ImageView iView = RenderUtil.canvasToImageView(canvasArr[canvasIndex],renderPane,false,false);
 
@@ -206,22 +248,34 @@ public class OrthogonalSlicesRenderer implements Renderer {
         }
 
         Node fxNode;
-        if (showTitles) {
+        if (decoration) {
+
+            //Create stack pane to stack decoration canvas on imageview
             StackPane stackPane = new StackPane();
-            stackPane.setPrefHeight(iView.getFitHeight());
-            stackPane.setPrefWidth(iView.getFitWidth());
-            Text titleLabel = new Text(title + " slice: "+(selectedSlice+1));
-            titleLabel.setFont(Font.font("Verdana", 10));
-            titleLabel.setFill(Color.LIGHTGREEN);
+            stackPane.setPrefWidth(iView.getBoundsInParent().getWidth()+1);
+            stackPane.setPrefHeight(iView.getBoundsInParent().getHeight()+1);
+
+            //Draw text and rectangle box
+            Canvas decoCanv = new Canvas(iView.getBoundsInParent().getWidth()+1, iView.getBoundsInParent().getHeight()+1);
+            GraphicsContext decoGc = decoCanv.getGraphicsContext2D();
+            decoGc.setGlobalAlpha(decorationAlpha);
+            decoGc.setStroke(viewColors[staticDim]);
+            decoGc.setLineWidth(1.0d);
+            decoGc.strokeRect(0, 0, decoCanv.getWidth(), decoCanv.getHeight());
+            decoGc.setFill(Color.WHITE);
+            decoGc.setFont(Font.font("Verdana", 10));
+            decoGc.fillText(title + " slice: " + (selectedSlice[staticDim]+1),2,10);
+
+            //stack
             stackPane.getChildren().add(iView);
-            stackPane.setAlignment(Pos.TOP_LEFT);
-            stackPane.getChildren().add(titleLabel);
+            stackPane.getChildren().add(decoCanv);
             fxNode = stackPane;
+
         } else {
             fxNode = iView;
         }
 
-        //If not rendered "for the first time" (size!=3) add view, else set new
+        //If not rendered "for the first time" (size!=3) add node, else set new
         if (renderPane.getChildren().size() == 3) {
             renderPane.getChildren().set(canvasIndex,fxNode);
         } else {

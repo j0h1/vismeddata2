@@ -1,6 +1,8 @@
 package renderer;
 
 import dicom.DicomImage;
+import filter.Filter;
+import filter.FilterBank;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
@@ -16,7 +18,6 @@ public class MIPRenderer implements Renderer {
 
     private AnchorPane renderPane;
     protected Canvas canvas;
-    protected GraphicsContext gc;
 
     private DicomImage img;
 
@@ -26,19 +27,20 @@ public class MIPRenderer implements Renderer {
 
         this.renderPane = renderPane;
         this.canvas = new Canvas(img.getDimensions()[0],img.getDimensions()[1]);
-        this.gc = canvas.getGraphicsContext2D();
 
     }
 
     @Override
     public void render() {
 
+        renderPane.getChildren().setAll();
+
         //Local copies for faster rendering
         int[] imgDims = img.getDimensions();
         double imgMax = img.getMaxValue();
 
         //Render
-        PixelWriter pw = gc.getPixelWriter();
+        PixelWriter pw = canvas.getGraphicsContext2D().getPixelWriter();
         for (int x = 0; x < imgDims[0]; x++) {
             for (int y = 0; y < imgDims[1]; y++) {
 
@@ -57,6 +59,11 @@ public class MIPRenderer implements Renderer {
                 pw.setColor(x, y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
             }
         }
+
+        //Apply filter
+        Filter filter = FilterBank.getFilter();
+        filter.prepare(canvas);
+        canvas = filter.execute();
 
         //Create ImageView from canvas, set to pane
         ImageView iView = RenderUtil.canvasToImageView(canvas, renderPane, true, true);

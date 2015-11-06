@@ -48,13 +48,14 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideZ.setShowTickLabels(true);
         slideZ.setValue(renderer.getSelectedZ());
         Label labelZ = new Label();
-        labelZ.setText("Select Z: ");
+        labelZ.setText("Select Z (XY): ");
         labelZ.setLabelFor(slideZ);
 
-        slideZ.valueProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> ov,
-                                Number old_val, Number new_val) {
-                renderer.selectZ(new_val.intValue());
+        slideZ.valueProperty().addListener((ov, old_val, new_val) -> {
+            renderer.selectZ(new_val.intValue());
+            if (renderer.showDecoration()) {
+                renderer.render();
+            } else {
                 renderer.renderXY();
             }
         });
@@ -72,13 +73,14 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideY.setShowTickLabels(true);
         slideY.setValue(renderer.getSelectedY());
         Label labelY = new Label();
-        labelY.setText("Select Y: ");
+        labelY.setText("Select Y (XZ): ");
         labelY.setLabelFor(slideY);
 
-        slideY.valueProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> ov,
-                                Number old_val, Number new_val) {
-                renderer.selectY(new_val.intValue());
+        slideY.valueProperty().addListener((ov, old_val, new_val) -> {
+            renderer.selectY(new_val.intValue());
+            if (renderer.showDecoration()) {
+                renderer.render();
+            } else {
                 renderer.renderXZ();
             }
         });
@@ -95,13 +97,14 @@ public class OrthogonalSlicesVisualization implements Visualization {
         slideX.setShowTickLabels(true);
         slideX.setValue(renderer.getSelectedX());
         Label labelX = new Label();
-        labelX.setText("Select X: ");
+        labelX.setText("Select X (YZ): ");
         labelX.setLabelFor(slideX);
 
-        slideX.valueProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> ov,
-                                Number old_val, Number new_val) {
-                renderer.selectX(new_val.intValue());
+        slideX.valueProperty().addListener((ov, old_val, new_val) -> {
+            renderer.selectX(new_val.intValue());
+            if (renderer.showDecoration()) {
+                renderer.render();
+            } else {
                 renderer.renderYZ();
             }
         });
@@ -109,29 +112,45 @@ public class OrthogonalSlicesVisualization implements Visualization {
         pane.add(labelX,0,2);
         pane.add(slideX,1,2);
 
+        //Scale to XZ checkbox
         CheckBox scaleBox = new CheckBox("Scale to XZ");
         scaleBox.setSelected(true);
-        scaleBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> ov,
-                                Boolean old_val, Boolean new_val) {
-                renderer.setScaling(new_val);
-                renderer.render();
-            }
+        scaleBox.selectedProperty().addListener((ov, old_val, new_val) -> {
+            renderer.setScaling(new_val);
+            renderer.render();
         });
         pane.add(scaleBox,0,3);
 
-        CheckBox labelsBox = new CheckBox("Labels");
+        //Decoration checkbox & alpha slider
+        CheckBox labelsBox = new CheckBox("Decoration");
         labelsBox.setSelected(true);
-        labelsBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> ov,
-                                Boolean old_val, Boolean new_val) {
-                renderer.setShowTitles(new_val);
-                renderer.render();
+        Slider slideDecoAlpha = new Slider();
+        Label slideDecoAlphaLabel = new Label();
+        labelsBox.selectedProperty().addListener((ov, old_val, new_val) -> {
+            if (new_val == false) {
+                slideDecoAlpha.setDisable(true);
+                slideDecoAlphaLabel.setDisable(true);
+            } else {
+                slideDecoAlpha.setDisable(false);
+                slideDecoAlphaLabel.setDisable(false);
             }
+            renderer.setDecoration(new_val);
+            renderer.render();
         });
         pane.add(labelsBox,0,4);
 
-        //pane.getChildren().addAll(labelZ,slideZ,labelY,slideY,labelX,slideX);
+        slideDecoAlpha.setOrientation(Orientation.HORIZONTAL);
+        slideDecoAlpha.setMax(1.0d);
+        slideDecoAlpha.setMajorTickUnit(0.5d);
+        slideDecoAlpha.setValue(1.0d);
+        slideDecoAlphaLabel.setText("Decoration alpha: ");
+        slideDecoAlphaLabel.setLabelFor(slideDecoAlpha);
+        slideDecoAlpha.valueProperty().addListener((ov, old_val, new_val) -> {
+            renderer.setDecorationAlpha(new_val.doubleValue());
+            renderer.render();
+        });
+        pane.add(slideDecoAlphaLabel,0,5);
+        pane.add(slideDecoAlpha,1,5);
 
         return pane;
     }

@@ -14,7 +14,7 @@ import vtk.vtkImageData;
  */
 public class TFRenderer implements Renderer {
 
-    private vtkImageData img;
+    private DicomImage img;
     private double imgMax;
     private int imgDims[];
 
@@ -23,22 +23,9 @@ public class TFRenderer implements Renderer {
     protected GraphicsContext gc;
 
     public TFRenderer(AnchorPane renderPane, DicomImage dicomImage) {
-        this.img = dicomImage.getImageData();
-        this.imgDims = img.GetDimensions();
 
-        imgMax = Double.MIN_VALUE;
-        for (int x = 0; x < imgDims[0]; x++) {
-            for (int y = 0; y < imgDims[1]; y++) {
-                for (int z = 0; z < imgDims[2]; z++) {
-                    double pixelVal = img.GetScalarComponentAsDouble(x,y,z,0);
-
-                    //Get max
-                    if (pixelVal > imgMax) {
-                        imgMax = pixelVal;
-                    }
-                }
-            }
-        }
+        img = dicomImage;
+        this.imgDims = img.getDimensions();
 
         this.renderPane = renderPane;
         this.canvas = new Canvas(imgDims[0],imgDims[1]);
@@ -57,7 +44,7 @@ public class TFRenderer implements Renderer {
 
         for (int x = 0; x < imgDims[0]; x++) {
             for (int y = 0; y < imgDims[1]; y++) {
-                double pixelVal = img.GetScalarComponentAsDouble(x,y,0,0);
+                double pixelVal = img.getValue(x,y,0);
                 //TODO use transfer function
 //                pw.setColor(x, y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
             }
