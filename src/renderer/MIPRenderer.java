@@ -10,6 +10,8 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+
 /**
  * Created by felix on 03.11.2015.
  */
@@ -20,35 +22,66 @@ public class MIPRenderer implements Renderer {
     protected Canvas canvas;
 
     private DicomImage img;
+    private int dimensionIndex;
+    private boolean doScale;
 
     public MIPRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
         this.img = dicomImage;
-
         this.renderPane = renderPane;
-        this.canvas = new Canvas(img.getDimensions()[0],img.getDimensions()[1]);
 
+        dimensionIndex = 2;
+        doScale = true;
+
+    }
+
+    public boolean isScaling() {
+        return doScale;
+    }
+
+    public void setScaling(boolean doScale) {
+        this.doScale = doScale;
+    }
+
+    public int getViewingDimension() {
+        return dimensionIndex;
+    }
+
+    public void setViewingDimension(int dimensionIndex) {
+        this.dimensionIndex = dimensionIndex;
     }
 
     @Override
     public void render() {
 
         renderPane.getChildren().setAll();
+        ArrayList<Integer> allDims = new ArrayList<Integer>() {{ add(0); add(1); add(2); }};
+        allDims.remove(dimensionIndex);
 
         //Local copies for faster rendering
         int[] imgDims = img.getDimensions();
         double imgMax = img.getMaxValue();
 
+        canvas = new Canvas(imgDims[allDims.get(0)],imgDims[allDims.get(1)]);
+
         //Render
         PixelWriter pw = canvas.getGraphicsContext2D().getPixelWriter();
-        for (int x = 0; x < imgDims[0]; x++) {
-            for (int y = 0; y < imgDims[1]; y++) {
+        int[] pixelSelector = new int[3];
+        for (int i = 0; i < imgDims[allDims.get(0)]; i++) {
+
+            pixelSelector[allDims.get(0)] = i;
+
+            for (int j = 0; j < imgDims[allDims.get(1)]; j++) {
+
+                pixelSelector[allDims.get(1)] = j;
 
                 double curMax = Double.MIN_VALUE;
-                for (int z = 0; z < imgDims[2]; z++) {
+                for (int k = 0; k < imgDims[dimensionIndex]; k++) {
+
+                    pixelSelector[dimensionIndex] = k;
 
                     //Retrieve intensity
-                    double pixelVal = img.getValue(x,y,z);
+                    double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
 
                     //Get max
                     if (pixelVal > curMax) {
@@ -56,7 +89,11 @@ public class MIPRenderer implements Renderer {
                     }
                 }
                 //Set color
+<<<<<<< HEAD
                 pw.setColor(x, y, new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
+=======
+                pw.setColor(i, j,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
+>>>>>>> 8236feac0a298137338b2c21879b0b564c81a427
             }
         }
 
@@ -65,8 +102,16 @@ public class MIPRenderer implements Renderer {
         filter.prepare(canvas);
         canvas = filter.execute();
 
-        //Create ImageView from canvas, set to pane
-        ImageView iView = RenderUtil.canvasToImageView(canvas, renderPane, true, true);
+        //Create ImageView from canvas
+        ImageView iView;
+        if (doScale) {
+            iView = RenderUtil.canvasToImageView(canvas, renderPane, false, true);
+        } else {
+            iView = RenderUtil.canvasToImageView(canvas, renderPane, true, false);
+            renderPane.setTopAnchor(iView, renderPane.getHeight()*0.5-canvas.getHeight()*0.5);
+            renderPane.setLeftAnchor(iView, renderPane.getWidth()*0.5-canvas.getWidth()*0.5);
+        }
+
         renderPane.getChildren().setAll(iView);
 
     }
