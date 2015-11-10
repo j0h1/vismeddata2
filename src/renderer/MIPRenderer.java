@@ -56,7 +56,7 @@ public class MIPRenderer implements Renderer {
                     }
                 }
                 //Set color
-                pw.setColor(x, y,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
+                pw.setColor(x, y, new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
             }
         }
 
