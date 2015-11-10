@@ -16,8 +16,8 @@
                             <children>
                                 <GridPane minHeight="68.0" minWidth="294.0" prefHeight="131.0" prefWidth="294.0">
                                     <columnConstraints>
-                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="142.0" minWidth="10.0" prefWidth="123.0" />
-                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="187.0" minWidth="10.0" prefWidth="171.0" />
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="142.0" minWidth="10.0" prefWidth="102.0" />
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="195.0" minWidth="10.0" prefWidth="192.0" />
                                     </columnConstraints>
                                     <rowConstraints>
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
