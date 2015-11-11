@@ -271,7 +271,7 @@ public class TFVisualization implements Visualization {
             @Override
             public void handle(ActionEvent e) {
                 // reset visualization with default values
-                opacityGradientStops = new Stop[] { new Stop(0, new Color(1, 1, 1, 0)), new Stop(1, new Color(1, 1, 1, 0))};
+                opacityGradientStops = new Stop[] { new Stop(0, new Color(1, 1, 1, 1)), new Stop(1, new Color(1, 1, 1, 1))};
                 refreshOpacityMappingVisualization(false);
             }
         });
