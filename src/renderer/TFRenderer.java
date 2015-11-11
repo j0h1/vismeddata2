@@ -104,12 +104,18 @@ public class TFRenderer implements Renderer {
 
                         Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 
-                        // apply over operator
+                         // apply over operator
+//                        accumulatedColor = new Color(
+//                                mappedColor.getRed() + (1 - mappedColor.getOpacity()) * accumulatedColor.getRed() * accumulatedColor.getOpacity(),
+//                                mappedColor.getGreen() + (1 - mappedColor.getOpacity()) * accumulatedColor.getGreen() * accumulatedColor.getOpacity(),
+//                                mappedColor.getBlue() + (1 - mappedColor.getOpacity()) * accumulatedColor.getBlue() * accumulatedColor.getOpacity(),
+//                                mappedColor.getOpacity() + (1 - mappedColor.getOpacity()) * accumulatedColor.getOpacity());
+                        // apply under operator
                         accumulatedColor = new Color(
-                                mappedColor.getRed() + (1 - mappedColor.getOpacity()) * accumulatedColor.getRed() * accumulatedColor.getOpacity(),
-                                mappedColor.getGreen() + (1 - mappedColor.getOpacity()) * accumulatedColor.getGreen() * accumulatedColor.getOpacity(),
-                                mappedColor.getBlue() + (1 - mappedColor.getOpacity()) * accumulatedColor.getBlue() * accumulatedColor.getOpacity(),
-                                mappedColor.getOpacity() + (1 - mappedColor.getOpacity()) * accumulatedColor.getOpacity());
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() + accumulatedColor.getOpacity());
 
                     }
                 }
