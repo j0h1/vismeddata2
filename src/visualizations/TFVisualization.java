@@ -91,18 +91,26 @@ public class TFVisualization implements Visualization {
         //Dimension selection box
         ComboBox<String> dimCombo = new ComboBox<>();
         ObservableList<String> dimensions = FXCollections.observableArrayList();
-        dimensions.add("X");
-        dimensions.add("Y");
-        dimensions.add("Z");
+        dimensions.add("+X");
+        dimensions.add("+Y");
+        dimensions.add("+Z");
+        dimensions.add("-X");
+        dimensions.add("-Y");
+        dimensions.add("-Z");
         dimCombo.setItems(dimensions);
         dimCombo.setValue(dimensions.get(2));
         dimCombo.valueProperty().addListener((ov, oldStr, newStr) -> {
-            if (newStr.equals("X")) {
+            if (newStr.contains("X")) {
                 renderer.setViewingDimension(0);
-            } else if (newStr.equals("Y")) {
+            } else if (newStr.contains("Y")) {
                 renderer.setViewingDimension(1);
             } else {
                 renderer.setViewingDimension(2);
+            }
+            if (newStr.startsWith("+")) {
+                renderer.setFrontToBack(true);
+            } else {
+                renderer.setFrontToBack(false);
             }
             renderer.render();
         });

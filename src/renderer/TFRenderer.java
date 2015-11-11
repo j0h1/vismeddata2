@@ -24,6 +24,7 @@ public class TFRenderer implements Renderer {
 
     private int dimensionIndex;
     private boolean doScale;
+    private boolean frontToBack;
 
     public TFRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
@@ -33,6 +34,8 @@ public class TFRenderer implements Renderer {
 
         dimensionIndex = 2;
         doScale = true;
+        frontToBack = true;
+
     }
 
     @Override
@@ -63,28 +66,53 @@ public class TFRenderer implements Renderer {
             for (int j = 0; j < imgDims[allDims.get(1)]; j++) {
                 pixelSelector[allDims.get(1)] = j;
                 Color accumulatedColor = new Color(0, 0, 0, 0);
-                for (int k = 0; k < imgDims[dimensionIndex]; k++) {
+                if (frontToBack) {
+                    for (int k = 0; k < imgDims[dimensionIndex]; k++) {
 
-                    // terminate when max. opacity is reached
-                    if (accumulatedColor.getOpacity() >= 1.0) {
-                        break;
+                        // terminate when max. opacity is reached
+                        if (accumulatedColor.getOpacity() >= 1.0) {
+                            break;
+                        }
+
+                        // choose pixel value and normalize
+                        pixelSelector[dimensionIndex] = k;
+                        double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
+                        double pixelValNorm = Math.max(0, pixelVal / imgMax);
+
+                        Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
+
+                        // apply under operator
+                        accumulatedColor = new Color(
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                                (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() + accumulatedColor.getOpacity());
                     }
 
-                    // choose pixel value and normalize
-                    pixelSelector[dimensionIndex] = k;
-                    double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
-                    double pixelValNorm = Math.max(0, pixelVal / imgMax);
+                } else {
+                    for (int k = imgDims[dimensionIndex] - 1; k >= 0; k--) {
 
-                    Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
+                        // terminate when max. opacity is reached
+                        if (accumulatedColor.getOpacity() >= 1.0) {
+                            break;
+                        }
 
-                    // apply over operator
-                    accumulatedColor = new Color(
-                            accumulatedColor.getRed() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getRed(),
-                            accumulatedColor.getGreen() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getGreen(),
-                            accumulatedColor.getBlue() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getBlue(),
-                            accumulatedColor.getOpacity() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity());
+                        // choose pixel value and normalize
+                        pixelSelector[dimensionIndex] = k;
+                        double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
+                        double pixelValNorm = Math.max(0, pixelVal / imgMax);
+
+                        Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
+
+                        // apply over operator
+                        accumulatedColor = new Color(
+                                mappedColor.getRed() + (1 - mappedColor.getOpacity()) * accumulatedColor.getRed() * accumulatedColor.getOpacity(),
+                                mappedColor.getGreen() + (1 - mappedColor.getOpacity()) * accumulatedColor.getGreen() * accumulatedColor.getOpacity(),
+                                mappedColor.getBlue() + (1 - mappedColor.getOpacity()) * accumulatedColor.getBlue() * accumulatedColor.getOpacity(),
+                                mappedColor.getOpacity() + (1 - mappedColor.getOpacity()) * accumulatedColor.getOpacity());
+
+                    }
                 }
-
                 pw.setColor(i, j, accumulatedColor);
             }
         }
@@ -122,4 +150,11 @@ public class TFRenderer implements Renderer {
         this.dimensionIndex = dimensionIndex;
     }
 
+    public boolean isFrontToBack() {
+        return frontToBack;
+    }
+
+    public void setFrontToBack(boolean frontToBack) {
+        this.frontToBack = frontToBack;
+    }
 }
