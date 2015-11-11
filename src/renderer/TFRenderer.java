@@ -48,10 +48,6 @@ public class TFRenderer implements Renderer {
         renderXY();
         renderXZ();
         renderYZ();
-
-        //Create ImageView from canvas, set to pane
-//        ImageView iView = RenderUtil.canvasToImageView(canvas, renderPane, true, true);
-//        renderPane.getChildren().setAll(iView);
     }
 
     public void renderXY() {
