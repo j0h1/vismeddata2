@@ -63,7 +63,7 @@ public class TFVisualization implements Visualization {
 
         // initialize mappings and pass them to the TransferFunctionManager
         colorGradientStops = new Stop[] { new Stop(0, Color.BLACK), new Stop(1, Color.WHITE)};
-        opacityGradientStops = new Stop[] { new Stop(0, new Color(1, 1, 1, 1)), new Stop(1, new Color(1, 1, 1, 1))};
+        opacityGradientStops = new Stop[] { new Stop(0, new Color(0, 0, 0, 0)), new Stop(1, new Color(0, 0, 0, 1))};
 
         TransferFunctionManager.getInstance().setColorMapping(colorGradientStops);
         TransferFunctionManager.getInstance().setOpacityMapping(opacityGradientStops);
@@ -271,7 +271,7 @@ public class TFVisualization implements Visualization {
             @Override
             public void handle(ActionEvent e) {
                 // reset visualization with default values
-                opacityGradientStops = new Stop[] { new Stop(0, new Color(1, 1, 1, 1)), new Stop(1, new Color(1, 1, 1, 1))};
+                opacityGradientStops = new Stop[] { new Stop(0, new Color(0, 0, 0, 0)), new Stop(1, new Color(0, 0, 0, 1))};
                 refreshOpacityMappingVisualization(false);
             }
         });
