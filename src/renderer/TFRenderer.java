@@ -3,14 +3,13 @@ package renderer;
 import dicom.DicomImage;
 import filter.Filter;
 import filter.FilterBank;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import vtk.vtkImageData;
+import java.util.ArrayList;
 
 /**
  * Created by j0h1 on 04.11.2015.
@@ -18,26 +17,22 @@ import vtk.vtkImageData;
 public class TFRenderer implements Renderer {
 
     private DicomImage img;
-    private double imgMax;
-    private int imgDims[];
 
     private AnchorPane renderPane;
-    protected Canvas[] canvasArr;
     protected Canvas canvas;
     protected GraphicsContext gc;
+
+    private int dimensionIndex;
+    private boolean doScale;
 
     public TFRenderer(AnchorPane renderPane, DicomImage dicomImage) {
 
         img = dicomImage;
-        this.imgDims = img.getDimensions();
 
         this.renderPane = renderPane;
 
-        //Create 3 canvases for rendering from every direction
-        this.canvasArr = new Canvas[3];
-        canvasArr[0] = new Canvas(imgDims[0],imgDims[1]); //XY
-        canvasArr[1] = new Canvas(imgDims[0],imgDims[2]); //XZ
-        canvasArr[2] = new Canvas(imgDims[1],imgDims[2]); //YZ
+        dimensionIndex = 2;
+        doScale = true;
     }
 
     @Override
@@ -45,51 +40,44 @@ public class TFRenderer implements Renderer {
 
         renderPane.getChildren().setAll();
 
-        renderXY();
-        renderXZ();
-        renderYZ();
-    }
+        ArrayList<Integer> allDims = new ArrayList<Integer>() {{
+            add(0);
+            add(1);
+            add(2);
+        }};
+        allDims.remove(dimensionIndex);
 
-    public void renderXY() {
-        Node fxNode = renderSlice(0, 1, 2, 0, false, "XY");
-
-        renderPane.setTopAnchor(fxNode, 5.0);
-        renderPane.setLeftAnchor(fxNode, 5.0);
-    }
-
-    public void renderXZ() {
-        Node fxNode = renderSlice(0, 2, 1, 1, true, "XZ");
-
-        renderPane.setTopAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[1].getHeight() * 0.5d);
-        renderPane.setRightAnchor(fxNode, imgDims[1] * 0.5d - canvasArr[1].getWidth() * 0.5d);
-    }
-
-    public void renderYZ() {
-        Node fxNode = renderSlice(1, 2, 0, 2, true, "YZ");
-
-        renderPane.setBottomAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
-        renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
-    }
-
-    private Node renderSlice(int dim1, int dim2, int staticDim, int canvasIndex, boolean resizeToXY, String title) {
-
-        //Local copies for faster rendering
+        // init image dimensions and max value
         int[] imgDims = img.getDimensions();
         double imgMax = img.getMaxValue();
 
-        gc = canvasArr[canvasIndex].getGraphicsContext2D();
+        canvas = new Canvas(imgDims[allDims.get(0)], imgDims[allDims.get(1)]);
+        gc = canvas.getGraphicsContext2D();
 
         //Render
-        PixelWriter pw = gc.getPixelWriter();
-        for (int i = 0; i < imgDims[dim1]; i++) {
-            for (int j = 0; j < imgDims[dim2]; j++) {
+        PixelWriter pw = canvas.getGraphicsContext2D().getPixelWriter();
+        int[] pixelSelector = new int[3];
+
+        for (int i = 0; i < imgDims[allDims.get(0)]; i++) {
+            pixelSelector[allDims.get(0)] = i;
+            for (int j = 0; j < imgDims[allDims.get(1)]; j++) {
+                pixelSelector[allDims.get(1)] = j;
                 Color accumulatedColor = new Color(0, 0, 0, 0);
-                for (int k = 0; k < imgDims[staticDim]; k++) {
-                    double pixelValNorm = getNormalizedPixelValue(i, j, k, staticDim, imgMax);
+                for (int k = 0; k < imgDims[dimensionIndex]; k++) {
+
+                    // terminate when max. opacity is reached
+                    if (accumulatedColor.getOpacity() >= 1.0) {
+                        break;
+                    }
+
+                    // choose pixel value and normalize
+                    pixelSelector[dimensionIndex] = k;
+                    double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
+                    double pixelValNorm = Math.max(0, pixelVal / imgMax);
 
                     Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 
-                    // over operator?
+                    // apply over operator
                     accumulatedColor = new Color(
                             accumulatedColor.getRed() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getRed(),
                             accumulatedColor.getGreen() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getGreen(),
@@ -101,37 +89,37 @@ public class TFRenderer implements Renderer {
             }
         }
 
-        //Apply filter
+        // apply chosen filter
         Filter filter = FilterBank.getFilter();
-        filter.prepare(canvasArr[canvasIndex]);
-        canvasArr[canvasIndex] = filter.execute();
+        filter.prepare(canvas);
+        canvas = filter.execute();
 
-        ImageView iView = RenderUtil.canvasToImageView(canvasArr[canvasIndex], renderPane, false, false);
-
-        if (resizeToXY) {
-            iView.setFitWidth(imgDims[0]);
-            iView.setFitHeight(imgDims[1]);
-        }
-
-        //If not rendered "for the first time" (size!=3) add node, else set new
-        if (renderPane.getChildren().size() == 3) {
-            renderPane.getChildren().set(canvasIndex, iView);
+        ImageView iView;
+        if (doScale) {
+            iView = RenderUtil.canvasToImageView(canvas, renderPane, false, true);
         } else {
-            renderPane.getChildren().add(iView);
+            iView = RenderUtil.canvasToImageView(canvas, renderPane, true, false);
+            renderPane.setTopAnchor(iView, renderPane.getHeight() * 0.5 - canvas.getHeight() * 0.5);
+            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - canvas.getWidth() * 0.5);
         }
 
-        return iView;
+        renderPane.getChildren().setAll(iView);
     }
 
-    private double getNormalizedPixelValue(int i, int j, int k, int staticDim, double imgMax) {
-        switch (staticDim) {
-            case 0:
-                return Math.max(0, img.getValue(k, i, j) / imgMax);
-            case 1:
-                return Math.max(0, img.getValue(i, k, j) / imgMax);
-            default:
-                return Math.max(0, img.getValue(i, j, k) / imgMax);
-        }
+    public boolean isScaling() {
+        return doScale;
+    }
+
+    public void setScaling(boolean doScale) {
+        this.doScale = doScale;
+    }
+
+    public int getViewingDimension() {
+        return dimensionIndex;
+    }
+
+    public void setViewingDimension(int dimensionIndex) {
+        this.dimensionIndex = dimensionIndex;
     }
 
 }

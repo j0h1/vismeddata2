@@ -3,6 +3,8 @@ package visualizations;
 import dicom.DicomImage;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -59,8 +61,6 @@ public class TFVisualization implements Visualization {
 
     @Override
     public Pane getVisSettings() {
-        GridPane pane = new GridPane();
-
         // initialize mappings and pass them to the TransferFunctionManager
         colorGradientStops = new Stop[] { new Stop(0, Color.BLACK), new Stop(1, Color.WHITE)};
         opacityGradientStops = new Stop[] { new Stop(0, new Color(0, 0, 0, 0)), new Stop(1, new Color(0, 0, 0, 1))};
@@ -68,11 +68,60 @@ public class TFVisualization implements Visualization {
         TransferFunctionManager.getInstance().setColorMapping(colorGradientStops);
         TransferFunctionManager.getInstance().setOpacityMapping(opacityGradientStops);
 
-        initColorMappingControls(pane);
+        GridPane dimAndScalingPane = new GridPane();
+        dimAndScalingPane.setPadding(new Insets(10,0,0,0));
+        dimAndScalingPane.setHgap(5);
+        dimAndScalingPane.setVgap(5);
+        initScaleAndDimensionControls(dimAndScalingPane);
 
-        initOpacityMappingControls(pane);
+        GridPane tfPane = new GridPane();
+        tfPane.setPadding(new Insets(10, 0, 0, 0));
+        tfPane.setHgap(5);
+        tfPane.setVgap(5);
+        initColorMappingControls(tfPane);
+        initOpacityMappingControls(tfPane);
 
-        return pane;
+        VBox box = new VBox();
+        box.getChildren().addAll(dimAndScalingPane, tfPane);
+
+        return box;
+    }
+
+    private void initScaleAndDimensionControls(GridPane pane) {
+        //Dimension selection box
+        ComboBox<String> dimCombo = new ComboBox<>();
+        ObservableList<String> dimensions = FXCollections.observableArrayList();
+        dimensions.add("X");
+        dimensions.add("Y");
+        dimensions.add("Z");
+        dimCombo.setItems(dimensions);
+        dimCombo.setValue(dimensions.get(2));
+        dimCombo.valueProperty().addListener((ov, oldStr, newStr) -> {
+            if (newStr.equals("X")) {
+                renderer.setViewingDimension(0);
+            } else if (newStr.equals("Y")) {
+                renderer.setViewingDimension(1);
+            } else {
+                renderer.setViewingDimension(2);
+            }
+            renderer.render();
+        });
+
+        Label dimLabel = new Label();
+        dimLabel.setText("Projection dimension: ");
+        dimLabel.setLabelFor(dimCombo);
+
+        pane.addRow(currentRowIndex++, dimLabel, dimCombo);
+
+        //Scale checkbox
+        CheckBox scaleBox = new CheckBox("Scale: ");
+        scaleBox.setSelected(true);
+        scaleBox.selectedProperty().addListener((ov, old_val, new_val) -> {
+            renderer.setScaling(new_val);
+            renderer.render();
+        });
+
+        pane.addRow(currentRowIndex++, scaleBox);
     }
 
     private void initColorMappingControls(GridPane parent) {
