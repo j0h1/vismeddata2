@@ -64,7 +64,7 @@ public class Controller {
         ObservableList<String> visTypes = FXCollections.observableArrayList();
         visTypes.add("Orthogonal Slices");
         visTypes.add("MIP");
-        visTypes.add("Transfer Function");
+        visTypes.add("DVR");
         visTypeCombo.setItems(visTypes);
         visTypeCombo.setValue(visTypes.get(1));
 
@@ -137,7 +137,7 @@ public class Controller {
                 vis = new OrthogonalSlicesVisualization(vtkPane, dicomImage);
             } else if (visTypeCombo.getValue().equals("MIP")) {
                 vis = new MIPVisualization(vtkPane, dicomImage);
-            } else if (visTypeCombo.getValue().equals("Transfer Function")) {
+            } else if (visTypeCombo.getValue().equals("DVR")) {
                 vis = new TFVisualization(vtkPane, dicomImage);
             }
 

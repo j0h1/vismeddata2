@@ -89,18 +89,12 @@ public class TFRenderer implements Renderer {
 
                     Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 
-                    // over operator
-//                    accumulatedColor = new Color(
-//                            accumulatedColor.getRed() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getRed(),
-//                            accumulatedColor.getGreen() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getGreen(),
-//                            accumulatedColor.getBlue() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getBlue(),
-//                            accumulatedColor.getOpacity() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity());
-
+                    // over operator?
                     accumulatedColor = new Color(
-                            mappedColor.getRed() + (1 - mappedColor.getOpacity()) * accumulatedColor.getRed(),
-                            mappedColor.getGreen() + (1 - mappedColor.getOpacity()) * accumulatedColor.getGreen(),
-                            mappedColor.getBlue() + (1 - mappedColor.getOpacity()) * accumulatedColor.getBlue(),
-                            mappedColor.getOpacity() + (1 - mappedColor.getOpacity()) * accumulatedColor.getOpacity());
+                            accumulatedColor.getRed() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getRed(),
+                            accumulatedColor.getGreen() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getGreen(),
+                            accumulatedColor.getBlue() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() * mappedColor.getBlue(),
+                            accumulatedColor.getOpacity() + (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity());
                 }
 
                 pw.setColor(i, j, accumulatedColor);
