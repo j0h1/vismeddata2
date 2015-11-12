@@ -73,7 +73,6 @@ public class TFRenderer implements Renderer {
                         }
                         accumulatedColor = accumulateColor(accumulatedColor, pixelSelector, k);
                     }
-
                 } else {
                     for (int k = imgDims[dimensionIndex] - 1; k >= 0; k--) {
                         if (accumulatedColor.getOpacity() >= 1.0) {
@@ -113,13 +112,11 @@ public class TFRenderer implements Renderer {
         Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 
         // apply under operator
-        accumulatedColor = new Color(
+        return new Color(
                 (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
-                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
-                (1 - accumulatedColor.getOpacity()) * mappedColor.getRed() + accumulatedColor.getOpacity() * accumulatedColor.getRed(),
+                (1 - accumulatedColor.getOpacity()) * mappedColor.getGreen() + accumulatedColor.getOpacity() * accumulatedColor.getGreen(),
+                (1 - accumulatedColor.getOpacity()) * mappedColor.getBlue() + accumulatedColor.getOpacity() * accumulatedColor.getBlue(),
                 (1 - accumulatedColor.getOpacity()) * mappedColor.getOpacity() + accumulatedColor.getOpacity());
-
-        return accumulatedColor;
 
     }
 
