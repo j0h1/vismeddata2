@@ -4,7 +4,6 @@ import dicom.DicomImage;
 import filter.Filter;
 import filter.FilterBank;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.AnchorPane;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
  * Created by felix on 03.11.2015.
  */
 public class MIPRenderer implements Renderer {
-
 
     private AnchorPane renderPane;
     protected Canvas canvas;
@@ -60,7 +58,6 @@ public class MIPRenderer implements Renderer {
 
         //Local copies for faster rendering
         int[] imgDims = img.getDimensions();
-        double imgMax = img.getMaxValue();
 
         canvas = new Canvas(imgDims[allDims.get(0)],imgDims[allDims.get(1)]);
 
@@ -81,16 +78,15 @@ public class MIPRenderer implements Renderer {
                     pixelSelector[dimensionIndex] = k;
 
                     //Retrieve intensity
-                    double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
+                    double pixelVal = img.getRelativeWindowedValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
 
                     //Get max
                     if (pixelVal > curMax) {
                         curMax = pixelVal;
                     }
                 }
-                //Set color
 
-                pw.setColor(i, j,new Color(curMax/imgMax,curMax/imgMax,curMax/imgMax,1));
+                pw.setColor(i, j,new Color(curMax,curMax,curMax,1));
             }
         }
 
@@ -105,9 +101,10 @@ public class MIPRenderer implements Renderer {
             iView = RenderUtil.canvasToImageView(canvas, renderPane, false, true);
         } else {
             iView = RenderUtil.canvasToImageView(canvas, renderPane, true, false);
-            renderPane.setTopAnchor(iView, renderPane.getHeight()*0.5-canvas.getHeight()*0.5);
-            renderPane.setLeftAnchor(iView, renderPane.getWidth()*0.5-canvas.getWidth()*0.5);
+            renderPane.setTopAnchor(iView, renderPane.getHeight() * 0.5 - canvas.getHeight() * 0.5);
+            renderPane.setLeftAnchor(iView, renderPane.getWidth() * 0.5 - canvas.getWidth() * 0.5);
         }
+        RenderUtil.enableInteractivity(iView);
 
         renderPane.getChildren().setAll(iView);
 

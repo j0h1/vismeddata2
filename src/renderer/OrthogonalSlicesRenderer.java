@@ -207,14 +207,13 @@ public class OrthogonalSlicesRenderer implements Renderer {
         //Draw on canvas, create a local copy of maxValue on stack
         GraphicsContext gc = canvasArr[canvasIndex].getGraphicsContext2D();
         PixelWriter pw = gc.getPixelWriter();
-        double imgMax = img.getMaxValue();
 
         for (int i = 0; i < imgDims[dim1];i++) {
             for (int j = 0; j < imgDims[dim2];j++) {
                 pixelSelector[dim1] = i;
                 pixelSelector[dim2] = j; //title offset
-                double pixelVal = img.getValue(pixelSelector[0],pixelSelector[1],pixelSelector[2]);
-                pw.setColor(i, j, new Color(pixelVal / imgMax, pixelVal / imgMax, pixelVal / imgMax, 1));
+                double pixelVal = img.getRelativeWindowedValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
+                pw.setColor(i, j, new Color(pixelVal, pixelVal, pixelVal, 1));
             }
         }
 
@@ -273,6 +272,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         } else {
             fxNode = iView;
+            RenderUtil.enableInteractivity(iView);
         }
 
         //If not rendered "for the first time" (size!=3) add node, else set new

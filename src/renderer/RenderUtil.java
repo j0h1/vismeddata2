@@ -1,5 +1,6 @@
 package renderer;
 
+import dicom.DicomImage;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
@@ -18,7 +19,7 @@ import javax.swing.*;
  */
 public class RenderUtil {
 
-    private static double orgSceneX, orgSceneY, orgTranslateX, orgTranslateY;
+    private static double orgSceneX, orgSceneY, orgTranslateX, orgTranslateY, lastY;
 
     public static ImageView canvasToImageView(Canvas canvas, Pane pane, boolean preserveRatio, boolean autoResize) {
         ImageView iView = new ImageView();
@@ -30,6 +31,11 @@ public class RenderUtil {
             iView.fitHeightProperty().bind(pane.heightProperty());
         }
 
+        return iView;
+    }
+
+    public static void enableInteractivity(ImageView iView) {
+
         iView.setCursor(Cursor.OPEN_HAND);
 
         iView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
@@ -40,6 +46,7 @@ public class RenderUtil {
             orgSceneY = event.getSceneY();
             orgTranslateX = ((ImageView)event.getSource()).getTranslateX();
             orgTranslateY = ((ImageView)event.getSource()).getTranslateX();
+            lastY = 0d;
         });
 
         iView.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
@@ -53,25 +60,40 @@ public class RenderUtil {
             iV.fitWidthProperty().unbind();
             iV.fitHeightProperty().unbind();
 
-            double offsetX = event.getSceneX() - orgSceneX;
-            double offsetY = event.getSceneY() - orgSceneY;
-            double newTranslateX = orgTranslateX + offsetX;
-            double newTranslateY = orgTranslateY + offsetY;
+            //Translation
+            double dx = event.getSceneX() - orgSceneX;
+            double dy = event.getSceneY() - orgSceneY;
 
-            if (event.isPrimaryButtonDown() && event.isSecondaryButtonDown()) { //Left and Right Button -> scale
-                iV.setFitWidth(iV.getFitWidth()+offsetY*0.5);
-                iV.setFitHeight(iV.getFitHeight()+offsetY*0.5);
-            } else if (event.isPrimaryButtonDown()) { //Left Button -> Drag and Drop
-                iV.setTranslateX(newTranslateX);
-                iV.setTranslateY(newTranslateY);
-            } else if (event.isSecondaryButtonDown()) { //Right Button -> Window function
-
+            //Mouse moved up or down?
+            double trend = event.getY()-lastY;
+            if (trend > 0) {
+                trend = 1d;
+            } else {
+                trend = -1d;
             }
 
+            if (event.isPrimaryButtonDown() && event.isSecondaryButtonDown()) { //Left and Right Button -> scale
 
+                //Rescale and translate
+                double height = iV.getFitHeight();
+                double width = iV.getFitWidth();
+                iV.setFitHeight(height+height*0.025d*trend);
+                iV.setFitWidth(width+width*0.025d*trend);
+                iV.setTranslateX(orgTranslateX + width*0.025d*trend*-1d);
+                iV.setTranslateY(orgTranslateY + height*0.025d*trend*-1d);
+
+            } else if (event.isPrimaryButtonDown()) { //Left Button -> Drag and Drop
+
+                //Translate
+                iV.setTranslateX(orgTranslateX + dx);
+                iV.setTranslateY(orgTranslateY + dy);
+
+            } 
+
+            lastY = event.getY();
         });
 
-        return iView;
+
     }
 
     public static WritableImage canvasToWriteableImage(Canvas canvas) {

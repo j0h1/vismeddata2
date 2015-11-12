@@ -52,7 +52,6 @@ public class TFRenderer implements Renderer {
 
         // init image dimensions and max value
         int[] imgDims = img.getDimensions();
-        double imgMax = img.getMaxValue();
 
         canvas = new Canvas(imgDims[allDims.get(0)], imgDims[allDims.get(1)]);
         gc = canvas.getGraphicsContext2D();
@@ -76,8 +75,7 @@ public class TFRenderer implements Renderer {
 
                         // choose pixel value and normalize
                         pixelSelector[dimensionIndex] = k;
-                        double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
-                        double pixelValNorm = Math.max(0, pixelVal / imgMax);
+                        double pixelValNorm = img.getRelativeWindowedValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
 
                         Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 
@@ -99,8 +97,7 @@ public class TFRenderer implements Renderer {
 
                         // choose pixel value and normalize
                         pixelSelector[dimensionIndex] = k;
-                        double pixelVal = img.getValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
-                        double pixelValNorm = Math.max(0, pixelVal / imgMax);
+                        double pixelValNorm = img.getRelativeWindowedValue(pixelSelector[0], pixelSelector[1], pixelSelector[2]);
 
                         Color mappedColor = TransferFunctionManager.getInstance().apply(pixelValNorm);
 

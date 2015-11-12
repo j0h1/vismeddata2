@@ -13,7 +13,9 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -46,6 +48,10 @@ public class Controller {
     private ComboBox filterTypeCombo;
     @FXML
     private AnchorPane settingsPane;
+    @FXML
+    private Slider slideWindowLower;
+    @FXML
+    private Slider slideWindowUpper;
 
     private Stage stage;
     private DicomImage dicomImage;
@@ -143,6 +149,36 @@ public class Controller {
 
             settingsPane.getChildren().setAll(vis.getVisSettings());
             vis.getRenderer().render();
+
+            slideWindowLower.setDisable(false);
+            slideWindowLower.setMin(dicomImage.getWindowLower());
+            slideWindowLower.setMax(dicomImage.getWindowUpper());
+            slideWindowLower.setValue(slideWindowLower.getMin());
+            slideWindowLower.valueProperty().addListener((ov, old_val, new_val) -> {
+                double upperVal = slideWindowUpper.getValue();
+                if(new_val.doubleValue() > upperVal) {
+                    slideWindowLower.setValue(upperVal);
+                    dicomImage.setWindowLower(upperVal);
+                } else {
+                    dicomImage.setWindowLower(new_val.doubleValue());
+                }
+                vis.getRenderer().render();
+            });
+
+            slideWindowUpper.setDisable(false);
+            slideWindowUpper.setMin(dicomImage.getWindowLower());
+            slideWindowUpper.setMax(dicomImage.getWindowUpper());
+            slideWindowUpper.setValue(slideWindowUpper.getMax());
+            slideWindowUpper.valueProperty().addListener((ov, old_val, new_val) -> {
+                double lowerVal = slideWindowLower.getValue();
+                if(new_val.doubleValue() < lowerVal) {
+                    slideWindowUpper.setValue(lowerVal);
+                    dicomImage.setWindowUpper(lowerVal);
+                } else {
+                    dicomImage.setWindowUpper(new_val.doubleValue());
+                }
+                vis.getRenderer().render();
+            });
 
         }
 

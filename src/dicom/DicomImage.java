@@ -9,13 +9,14 @@ import vtk.vtkImageData;
  */
 public class DicomImage {
 
-    private double maxValue;
     private double[] imgArr;
     private int[] dimensions;
 
     private int dimensionX;
     private int dimensionY;
     private int dimensionZ;
+    private double windowUpper;
+    private double windowLower;
 
     public DicomImage(vtkImageData imageData, vtkAlgorithmOutput imagePort) {
 
@@ -30,21 +31,47 @@ public class DicomImage {
         //Create 1D-java image array and locate max intensity value
         vtkDataArray scalars =  imageData.GetPointData().GetScalars();
         imgArr = new double[scalars.GetSize()];
-        maxValue = Double.MIN_VALUE;
+        windowUpper = Double.MIN_VALUE;
         for (int i = 0; i < scalars.GetSize(); i++) {
             imgArr[i] = scalars.GetTuple1(i);
-            if (scalars.GetTuple1(i) > maxValue) {
-                maxValue = scalars.GetTuple1(i);
+            if (scalars.GetTuple1(i) > windowUpper) {
+                windowUpper = scalars.GetTuple1(i);
             }
         }
 
         //Reporting prints
         System.out.println("DICOM LOADED\n\tdimX: "+dimensions[0]+" dimY: "+dimensions[1]+" dim Z: "+dimensions[2]);
-        System.out.println("\tMax-estimate: "+maxValue+" (VTK: "+maxValue+")");
+        System.out.println("\tWindow value (from max): "+windowUpper);
     }
 
-    public double getMaxValue() {
-        return maxValue;
+    public double getWindowedValue(int x, int y, int z) {
+        return Math.max(Math.min(getValue(x, y, z), windowUpper),windowLower);
+    }
+
+    public double getRelativeWindowedValue(int x, int y, int z) {
+        return (getWindowedValue(x, y, z)-windowLower)/(windowUpper-windowLower);
+    }
+
+    public double getWindowLower() {
+        return windowLower;
+    }
+
+    public void setWindowLower(double window) {
+        if (window > windowUpper) {
+            return;
+        }
+        this.windowLower = window;
+    }
+
+    public double getWindowUpper() {
+        return windowUpper;
+    }
+
+    public void setWindowUpper(double window) {
+        if (window < 0) {
+            return;
+        }
+        this.windowUpper = window;
     }
 
 
