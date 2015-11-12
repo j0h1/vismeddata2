@@ -92,10 +92,10 @@ public class TFVisualization implements Visualization {
         ComboBox<String> dimCombo = new ComboBox<>();
         ObservableList<String> dimensions = FXCollections.observableArrayList();
         dimensions.add("+X");
-        dimensions.add("+Y");
-        dimensions.add("+Z");
         dimensions.add("-X");
+        dimensions.add("+Y");
         dimensions.add("-Y");
+        dimensions.add("+Z");
         dimensions.add("-Z");
         dimCombo.setItems(dimensions);
         dimCombo.setValue(dimensions.get(2));
