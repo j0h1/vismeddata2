@@ -21,10 +21,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import dicom.DicomUtil;
-import visualizations.MIPVisualization;
-import visualizations.OrthogonalSlicesVisualization;
-import visualizations.TFVisualization;
-import visualizations.Visualization;
+import visualizations.*;
 
 import java.io.File;
 
@@ -83,6 +80,8 @@ public class Controller {
 
         vtkPane.setStyle("-fx-background-color: black;");
 
+        vis = new BlankVisualization(settingsPane);
+
 
     }
 
@@ -114,6 +113,37 @@ public class Controller {
         int[] imgDims = dicomImage.getDimensions();
         dataPathLabel.setText(path.substring(path.lastIndexOf("\\")+1, path.length()) + " ("+imgDims[0]+"x"+imgDims[1]+"x"+imgDims[2]+")");
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
+
+        //Init window function
+        slideWindowLower.setDisable(false);
+        slideWindowLower.setMin(dicomImage.getWindowLower());
+        slideWindowLower.setMax(dicomImage.getWindowUpper());
+        slideWindowLower.setValue(slideWindowLower.getMin());
+        slideWindowLower.valueProperty().addListener((ov, old_val, new_val) -> {
+            double upperVal = slideWindowUpper.getValue();
+            if(new_val.doubleValue() > upperVal) {
+                slideWindowLower.setValue(upperVal);
+                dicomImage.setWindowLower(upperVal);
+            } else {
+                dicomImage.setWindowLower(new_val.doubleValue());
+            }
+            vis.getRenderer().render();
+        });
+
+        slideWindowUpper.setDisable(false);
+        slideWindowUpper.setMin(dicomImage.getWindowLower());
+        slideWindowUpper.setMax(dicomImage.getWindowUpper());
+        slideWindowUpper.setValue(slideWindowUpper.getMax());
+        slideWindowUpper.valueProperty().addListener((ov, old_val, new_val) -> {
+            double lowerVal = slideWindowLower.getValue();
+            if(new_val.doubleValue() < lowerVal) {
+                slideWindowUpper.setValue(lowerVal);
+                dicomImage.setWindowUpper(lowerVal);
+            } else {
+                dicomImage.setWindowUpper(new_val.doubleValue());
+            }
+            vis.getRenderer().render();
+        });
 
         doVis();
     }
@@ -149,36 +179,6 @@ public class Controller {
 
             settingsPane.getChildren().setAll(vis.getVisSettings());
             vis.getRenderer().render();
-
-            slideWindowLower.setDisable(false);
-            slideWindowLower.setMin(dicomImage.getWindowLower());
-            slideWindowLower.setMax(dicomImage.getWindowUpper());
-            slideWindowLower.setValue(slideWindowLower.getMin());
-            slideWindowLower.valueProperty().addListener((ov, old_val, new_val) -> {
-                double upperVal = slideWindowUpper.getValue();
-                if(new_val.doubleValue() > upperVal) {
-                    slideWindowLower.setValue(upperVal);
-                    dicomImage.setWindowLower(upperVal);
-                } else {
-                    dicomImage.setWindowLower(new_val.doubleValue());
-                }
-                vis.getRenderer().render();
-            });
-
-            slideWindowUpper.setDisable(false);
-            slideWindowUpper.setMin(dicomImage.getWindowLower());
-            slideWindowUpper.setMax(dicomImage.getWindowUpper());
-            slideWindowUpper.setValue(slideWindowUpper.getMax());
-            slideWindowUpper.valueProperty().addListener((ov, old_val, new_val) -> {
-                double lowerVal = slideWindowLower.getValue();
-                if(new_val.doubleValue() < lowerVal) {
-                    slideWindowUpper.setValue(lowerVal);
-                    dicomImage.setWindowUpper(lowerVal);
-                } else {
-                    dicomImage.setWindowUpper(new_val.doubleValue());
-                }
-                vis.getRenderer().render();
-            });
 
         }
 

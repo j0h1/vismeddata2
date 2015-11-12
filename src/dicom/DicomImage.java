@@ -17,6 +17,7 @@ public class DicomImage {
     private int dimensionZ;
     private double windowUpper;
     private double windowLower;
+    private double windowSpan;
 
     public DicomImage(vtkImageData imageData, vtkAlgorithmOutput imagePort) {
 
@@ -39,17 +40,20 @@ public class DicomImage {
             }
         }
 
+        windowLower = 0;
+        windowSpan = windowUpper;
+
         //Reporting prints
         System.out.println("DICOM LOADED\n\tdimX: "+dimensions[0]+" dimY: "+dimensions[1]+" dim Z: "+dimensions[2]);
         System.out.println("\tWindow value (from max): "+windowUpper);
     }
 
     public double getWindowedValue(int x, int y, int z) {
-        return Math.max(Math.min(getValue(x, y, z), windowUpper),windowLower);
+        return Math.max(Math.min(getValue(x, y, z), windowUpper), windowLower);
     }
 
     public double getRelativeWindowedValue(int x, int y, int z) {
-        return (getWindowedValue(x, y, z)-windowLower)/(windowUpper-windowLower);
+        return (getWindowedValue(x, y, z)-windowLower)/windowSpan;
     }
 
     public double getWindowLower() {
@@ -61,6 +65,7 @@ public class DicomImage {
             return;
         }
         this.windowLower = window;
+        updateWindowSpan();
     }
 
     public double getWindowUpper() {
@@ -72,6 +77,11 @@ public class DicomImage {
             return;
         }
         this.windowUpper = window;
+        updateWindowSpan();
+    }
+
+    private void updateWindowSpan() {
+        windowSpan = windowUpper - windowLower;
     }
 
 
