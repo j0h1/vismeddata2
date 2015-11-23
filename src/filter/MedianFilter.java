@@ -4,29 +4,39 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.paint.Color;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by felix on 06.11.2015.
  */
 public class MedianFilter extends Filter {
 
+    private HashMap<Double,Color> intensity2Colors;
+
+    public MedianFilter() {
+        super();
+        intensity2Colors = new HashMap<>();
+    }
+
+
     @Override
     public void apply(int x, int y, PixelWriter pw) {
 
-        double[] neighbourhood = new double[9];
-        int counter=0;
+        double[] nbh = new double[9];
+        intensity2Colors.clear();
 
+        int counter=0;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                neighbourhood[counter] = getColor(x+i,y+j).getRed();
+                Color c = getColor(x+i,y+j);
+                nbh[counter] = (c.getRed()+c.getGreen()+c.getBlue())/3d;
+                intensity2Colors.put(nbh[counter],c);
                 counter++;
             }
         }
 
-        Arrays.sort(neighbourhood);
+        Arrays.sort(nbh);
 
-        double medianIntensity = neighbourhood[4];
-
-        pw.setColor(x,y,new Color(medianIntensity,medianIntensity,medianIntensity,1.0));
+        pw.setColor(x,y,intensity2Colors.get(nbh[4]));
     }
 }

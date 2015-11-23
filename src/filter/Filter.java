@@ -1,6 +1,7 @@
 package filter;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -13,11 +14,11 @@ import renderer.RenderUtil;
  */
 public abstract class Filter {
 
-    private WritableImage wImg;
+    protected WritableImage wImg;
     private PixelReader pr;
     private PixelWriter pw;
 
-    private double[] dimensions;
+    private int[] dimensions;
 
     /**
      * Prepares canvas for filtering.
@@ -31,9 +32,9 @@ public abstract class Filter {
         pr = wImgInput.getPixelReader();
         pw = wImg.getPixelWriter();
 
-        dimensions = new double[2];
-        dimensions[0] = wImg.getWidth();
-        dimensions[1] = wImg.getHeight();
+        dimensions = new int[2];
+        dimensions[0] = (int)wImg.getWidth();
+        dimensions[1] = (int)wImg.getHeight();
 
     }
 
@@ -43,13 +44,21 @@ public abstract class Filter {
      */
     public Canvas execute() {
 
-        for (int x = 0; x < (int)dimensions[0];x++) {
-            for (int y = 0; y < (int)dimensions[1]; y++) {
+        for (int x = 0; x < dimensions[0];x++) {
+            for (int y = 0; y < dimensions[1]; y++) {
                 apply(x,y,pw);
             }
         }
 
         return RenderUtil.writableimageToCanvas(wImg);
+    }
+
+    /**
+     * Returns the result of the last filtering operation as image
+     * @return
+     */
+    public Image lastImage() {
+        return wImg;
     }
 
     /**

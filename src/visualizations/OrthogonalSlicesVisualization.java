@@ -1,6 +1,7 @@
 package visualizations;
 
 import dicom.DicomImage;
+import gui.Controller;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -58,6 +59,7 @@ public class OrthogonalSlicesVisualization implements Visualization {
             } else {
                 renderer.renderXY();
             }
+            Controller.getInstance().updateHistogram();
         });
 
         //Element,column, row

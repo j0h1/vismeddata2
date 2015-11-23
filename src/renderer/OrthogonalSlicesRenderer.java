@@ -3,6 +3,7 @@ package renderer;
 import dicom.DicomImage;
 import filter.Filter;
 import filter.FilterBank;
+import gui.HistogramGenerator;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -222,6 +223,10 @@ public class OrthogonalSlicesRenderer implements Renderer {
         filter.prepare(canvasArr[canvasIndex]);
         canvasArr[canvasIndex] = filter.execute();
         gc = canvasArr[canvasIndex].getGraphicsContext2D();
+
+        if (staticDim == 2) { //XY view
+            HistogramGenerator.setImage(filter.lastImage());
+        }
 
         //Draw link-lines on canvas
         if (decoration) {

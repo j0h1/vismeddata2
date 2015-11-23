@@ -1,6 +1,8 @@
 package visualizations;
 
 import dicom.DicomImage;
+import gui.Controller;
+import gui.HistogramGenerator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -59,6 +61,7 @@ public class MIPVisualization implements Visualization {
                 renderer.setViewingDimension(2);
             }
             renderer.render();
+            Controller.getInstance().updateHistogram();
         });
 
         Label dimLabel = new Label();

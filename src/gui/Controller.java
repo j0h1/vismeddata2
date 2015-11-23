@@ -10,12 +10,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -46,20 +49,22 @@ public class Controller {
     @FXML
     private AnchorPane settingsPane;
     @FXML
-    private Slider slideWindowLower;
+    private HBox histoBox;
     @FXML
-    private Slider slideWindowUpper;
+    private Slider slideWindowCenter;
+    @FXML
+    private Slider slideWindowWidth;
 
     private Stage stage;
     private DicomImage dicomImage;
     private Visualization vis;
+    private static Controller instance;
 
     public void setStage(Stage stage) {
         this.stage = stage;
     }
 
-    @FXML
-    private void initialize() {
+    public void initialize() {
 
         //Clear status label
         statusLabel.setText("");
@@ -79,8 +84,9 @@ public class Controller {
         filterTypeCombo.setValue(filterTypes.get(0));
 
         vtkPane.setStyle("-fx-background-color: black;");
-
         vis = new BlankVisualization(settingsPane);
+
+        instance = this;
 
 
     }
@@ -115,33 +121,22 @@ public class Controller {
         updateStatus("Files loaded.", Color.DARKGREEN, 2000l);
 
         //Init window function
-        slideWindowLower.setDisable(false);
-        slideWindowLower.setMin(dicomImage.getWindowLower());
-        slideWindowLower.setMax(dicomImage.getWindowUpper());
-        slideWindowLower.setValue(slideWindowLower.getMin());
-        slideWindowLower.valueProperty().addListener((ov, old_val, new_val) -> {
-            double upperVal = slideWindowUpper.getValue();
-            if(new_val.doubleValue() > upperVal) {
-                slideWindowLower.setValue(upperVal);
-                dicomImage.setWindowLower(upperVal);
-            } else {
-                dicomImage.setWindowLower(new_val.doubleValue());
-            }
+        slideWindowCenter.setDisable(false);
+        slideWindowCenter.setMin(dicomImage.getWindowLower());
+        slideWindowCenter.setMax(dicomImage.getWindowUpper());
+        slideWindowCenter.setValue(dicomImage.getWindowUpper()*0.5d);
+        slideWindowCenter.valueProperty().addListener((ov, old_val, new_val) -> {
+            dicomImage.setWindowCenter(new_val.doubleValue());
+            updateHistogram();
             vis.getRenderer().render();
         });
-
-        slideWindowUpper.setDisable(false);
-        slideWindowUpper.setMin(dicomImage.getWindowLower());
-        slideWindowUpper.setMax(dicomImage.getWindowUpper());
-        slideWindowUpper.setValue(slideWindowUpper.getMax());
-        slideWindowUpper.valueProperty().addListener((ov, old_val, new_val) -> {
-            double lowerVal = slideWindowLower.getValue();
-            if(new_val.doubleValue() < lowerVal) {
-                slideWindowUpper.setValue(lowerVal);
-                dicomImage.setWindowUpper(lowerVal);
-            } else {
-                dicomImage.setWindowUpper(new_val.doubleValue());
-            }
+        slideWindowWidth.setDisable(false);
+        slideWindowWidth.setMin(0);
+        slideWindowWidth.setMax(dicomImage.getWindowUpper()*0.5d);
+        slideWindowWidth.setValue(slideWindowWidth.getMax());
+        slideWindowWidth.valueProperty().addListener((ov, old_val, new_val) -> {
+            dicomImage.setWindowWidth(new_val.doubleValue());
+            updateHistogram();
             vis.getRenderer().render();
         });
 
@@ -179,12 +174,13 @@ public class Controller {
 
             settingsPane.getChildren().setAll(vis.getVisSettings());
             vis.getRenderer().render();
+            updateHistogram();
 
         }
 
     }
 
-    private void updateStatus(String message, Color color, Long duration) {
+    public void updateStatus(String message, Color color, Long duration) {
 
         if (color != null) {
             statusLabel.textFillProperty().setValue(color);
@@ -202,4 +198,21 @@ public class Controller {
         }
 
     }
+
+    public void updateHistogram() {
+
+        double lowerWindowX = Math.round(dicomImage.getWindowLower()/dicomImage.getMaxVal()*histoBox.getWidth());
+        double upperWindowX = Math.round(dicomImage.getWindowUpper()/dicomImage.getMaxVal()*histoBox.getWidth());
+
+        Canvas histo = HistogramGenerator.generate2DHistogram(64,histoBox.getWidth(),histoBox.getHeight(),lowerWindowX,upperWindowX);
+        histoBox.getChildren().setAll(histo);
+    }
+
+    public static Controller getInstance() {
+        return instance;
+    }
+
+
 }
+
+

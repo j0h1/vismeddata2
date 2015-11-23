@@ -2,6 +2,8 @@ package filter;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
+import renderer.RenderUtil;
 
 /**
  * Created by felix on 06.11.2015.
@@ -16,6 +18,7 @@ public class BlankFilter extends Filter {
     public void prepare(Canvas canvas) {
 
         this.canvas = canvas;
+        super.wImg = RenderUtil.canvasToWriteableImage(canvas);
 
     }
 

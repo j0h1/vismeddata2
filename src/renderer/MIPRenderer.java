@@ -3,6 +3,7 @@ package renderer;
 import dicom.DicomImage;
 import filter.Filter;
 import filter.FilterBank;
+import gui.HistogramGenerator;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
@@ -94,6 +95,9 @@ public class MIPRenderer implements Renderer {
         Filter filter = FilterBank.getFilter();
         filter.prepare(canvas);
         canvas = filter.execute();
+
+        //Register for histogram
+        HistogramGenerator.setImage(filter.lastImage());
 
         //Create ImageView from canvas
         ImageView iView;

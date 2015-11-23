@@ -3,6 +3,7 @@ package renderer;
 import dicom.DicomImage;
 import filter.Filter;
 import filter.FilterBank;
+import gui.HistogramGenerator;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
@@ -89,6 +90,7 @@ public class TFRenderer implements Renderer {
         Filter filter = FilterBank.getFilter();
         filter.prepare(canvas);
         canvas = filter.execute();
+        HistogramGenerator.setImage(filter.lastImage());
 
         ImageView iView;
         if (doScale) {
