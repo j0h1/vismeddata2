@@ -6,7 +6,7 @@ import javafx.scene.paint.Color;
 /**
  * Created by felix on 06.11.2015.
  */
-public class GaussianFilter extends Filter {
+public class GaussianFilterCPU extends FilterCPU {
 
     @Override
     public void apply(int x, int y, PixelWriter pw) {

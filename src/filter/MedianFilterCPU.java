@@ -9,11 +9,11 @@ import java.util.HashMap;
 /**
  * Created by felix on 06.11.2015.
  */
-public class MedianFilter extends Filter {
+public class MedianFilterCPU extends FilterCPU {
 
     private HashMap<Double,Color> intensity2Colors;
 
-    public MedianFilter() {
+    public MedianFilterCPU() {
         super();
         intensity2Colors = new HashMap<>();
     }

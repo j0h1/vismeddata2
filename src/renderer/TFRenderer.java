@@ -1,7 +1,6 @@
 package renderer;
 
 import dicom.DicomImage;
-import filter.Filter;
 import filter.FilterBank;
 import gui.HistogramGenerator;
 import javafx.scene.canvas.Canvas;
@@ -86,11 +85,10 @@ public class TFRenderer implements Renderer {
             }
         }
 
-        // apply chosen filter
-        Filter filter = FilterBank.getFilter();
-        filter.prepare(canvas);
-        canvas = filter.execute();
-        HistogramGenerator.setImage(filter.lastImage());
+
+        //Apply filter & create histogram
+        canvas = FilterBank.applyFilter(canvas);
+        HistogramGenerator.setImage(FilterBank.getFilter().lastImage());
 
         ImageView iView;
         if (doScale) {

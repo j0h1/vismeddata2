@@ -10,7 +10,7 @@ import renderer.RenderUtil;
  *
  * Blank filter class that overrides EVERY method of the super class so that no unnecessary computations are done.
  */
-public class BlankFilter extends Filter {
+public class BlankFilter extends FilterCPU {
 
     private Canvas canvas;
 

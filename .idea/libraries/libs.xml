@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/vtk.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/simpleitk-source-0.9.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/simpleitk-javadoc-0.9.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/pixelmed.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/simpleitk-0.9.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/JOCL-0.2.0RC.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/libs/JOCL-0.2.0RC.jar!/doc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/JOCL-0.2.0RC.jar!/" />
+    </SOURCES>
+  </library>
+</component>

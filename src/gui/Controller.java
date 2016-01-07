@@ -3,21 +3,19 @@ package gui;
 import dicom.DicomImage;
 import filter.BlankFilter;
 import filter.FilterBank;
-import filter.GaussianFilter;
-import filter.MedianFilter;
+import filter.GaussianFilterCPU;
+import filter.MedianFilterCPU;
 import javafx.animation.FadeTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -150,9 +148,9 @@ public class Controller {
             if (filterTypeCombo.getValue().equals("None")) {
                 FilterBank.setFilter(new BlankFilter());
             } else if (filterTypeCombo.getValue().equals("Gaussian")) {
-                FilterBank.setFilter(new GaussianFilter());
+                FilterBank.setFilter(new GaussianFilterCPU());
             } else if (filterTypeCombo.getValue().equals("Median")) {
-                FilterBank.setFilter(new MedianFilter());
+                FilterBank.setFilter(new MedianFilterCPU());
             }
 
             vis.getRenderer().render();

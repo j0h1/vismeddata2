@@ -91,13 +91,9 @@ public class MIPRenderer implements Renderer {
             }
         }
 
-        //Apply filter
-        Filter filter = FilterBank.getFilter();
-        filter.prepare(canvas);
-        canvas = filter.execute();
-
-        //Register for histogram
-        HistogramGenerator.setImage(filter.lastImage());
+        //Apply filter & create histogram
+        canvas = FilterBank.applyFilter(canvas);
+        HistogramGenerator.setImage(FilterBank.getFilter().lastImage());
 
         //Create ImageView from canvas
         ImageView iView;

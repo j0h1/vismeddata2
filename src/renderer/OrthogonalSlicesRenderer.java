@@ -154,7 +154,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         Node fxNode = renderSlice(0,1,2,0,false,"XY");
 
-        renderPane.setTopAnchor(fxNode, 5.0);
+        renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
         renderPane.setLeftAnchor(fxNode, 5.0);
     }
 
@@ -163,10 +163,10 @@ public class OrthogonalSlicesRenderer implements Renderer {
         Node fxNode = renderSlice(0,2,1,1,doScale,"XZ");
 
         if (doScale) {
-            renderPane.setTopAnchor(fxNode, 5.0);
+            renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
             renderPane.setRightAnchor(fxNode, 5.0);
         } else {
-            renderPane.setTopAnchor(fxNode,imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
+            renderPane.setTopAnchor(fxNode,renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d+imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
             renderPane.setRightAnchor(fxNode,imgDims[1]*0.5d-canvasArr[1].getWidth()*0.5d);
         }
 
@@ -178,10 +178,10 @@ public class OrthogonalSlicesRenderer implements Renderer {
         Node fxNode = renderSlice(1,2,0,2,doScale,"YZ");
 
         if (doScale) {
-            renderPane.setBottomAnchor(fxNode, 5.0);
+            renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
             renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - fxNode.getBoundsInParent().getWidth()*0.5d);
         } else {
-            renderPane.setBottomAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
+            renderPane.setTopAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
             renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
         }
 
@@ -219,13 +219,11 @@ public class OrthogonalSlicesRenderer implements Renderer {
         }
 
         //Filter
-        Filter filter = FilterBank.getFilter();
-        filter.prepare(canvasArr[canvasIndex]);
-        canvasArr[canvasIndex] = filter.execute();
+        canvasArr[canvasIndex] = FilterBank.applyFilter(canvasArr[canvasIndex]);
         gc = canvasArr[canvasIndex].getGraphicsContext2D();
 
-        if (staticDim == 2) { //XY view
-            HistogramGenerator.setImage(filter.lastImage());
+        if (staticDim == 2) { //XY view - gen histo
+            HistogramGenerator.setImage(FilterBank.getFilter().lastImage());
         }
 
         //Draw link-lines on canvas
