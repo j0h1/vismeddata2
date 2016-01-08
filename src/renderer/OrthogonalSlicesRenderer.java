@@ -155,6 +155,7 @@ public class OrthogonalSlicesRenderer implements Renderer {
         Node fxNode = renderSlice(0,1,2,0,false,"XY");
 
         renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
+        renderPane.setBottomAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
         renderPane.setLeftAnchor(fxNode, 5.0);
     }
 
@@ -164,10 +165,14 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         if (doScale) {
             renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
-            renderPane.setRightAnchor(fxNode, 5.0);
+            renderPane.setBottomAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
+            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - fxNode.getBoundsInParent().getWidth()*0.5d);
+            renderPane.setRightAnchor(fxNode, renderPane.getWidth() * 0.5 - fxNode.getBoundsInParent().getWidth()*0.5d);
         } else {
-            renderPane.setTopAnchor(fxNode,renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d+imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
-            renderPane.setRightAnchor(fxNode,imgDims[1]*0.5d-canvasArr[1].getWidth()*0.5d);
+            renderPane.setTopAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
+            renderPane.setBottomAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
+            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
+            renderPane.setRightAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
         }
 
 
@@ -179,10 +184,12 @@ public class OrthogonalSlicesRenderer implements Renderer {
 
         if (doScale) {
             renderPane.setTopAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
-            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - fxNode.getBoundsInParent().getWidth()*0.5d);
+            renderPane.setBottomAnchor(fxNode, renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d);
+            renderPane.setRightAnchor(fxNode, 5.0);
         } else {
-            renderPane.setTopAnchor(fxNode, imgDims[0] * 0.5d - canvasArr[2].getHeight() * 0.5d);
-            renderPane.setLeftAnchor(fxNode, renderPane.getWidth() * 0.5 - canvasArr[2].getWidth() * 0.5);
+            renderPane.setTopAnchor(fxNode,renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d+imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
+            renderPane.setBottomAnchor(fxNode,renderPane.getHeight() * 0.5 - fxNode.getBoundsInParent().getHeight()*0.5d+imgDims[0]*0.5d-canvasArr[1].getHeight()*0.5d);
+            renderPane.setRightAnchor(fxNode, 5.0);
         }
 
 
