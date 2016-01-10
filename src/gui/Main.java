@@ -33,8 +33,7 @@ public class Main extends Application {
         Parent root = loader.load();
         primaryStage.setTitle("LOOKATVOLUMEDATA");
         primaryStage.setScene(new Scene(root, 1366, 768));
-        primaryStage.setMinWidth(1024);
-        primaryStage.setMinHeight(768);
+
 
         Controller controller = loader.getController();
         controller.setStage(primaryStage);

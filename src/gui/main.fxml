@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="768.0" minWidth="1024.0" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Controller">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="768.0" minWidth="1024.0" prefHeight="768.0" prefWidth="1366.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.Controller">
     <children>
         <SplitPane fx:id="contentPane" dividerPositions="0.3" layoutY="78.0" pickOnBounds="false" prefHeight="690.0" prefWidth="1024.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="78.0">
             <items>
@@ -74,16 +74,16 @@
                 <Font size="36.0" />
             </font>
         </Label>
-        <Label layoutX="385.0" layoutY="33.0" text="A Java DICOM-volume visualizer." textFill="#6f6e6e" AnchorPane.leftAnchor="385.0" AnchorPane.rightAnchor="380.0">
+        <Label layoutX="385.0" layoutY="33.0" prefHeight="27.0" prefWidth="551.0" text="A Java DICOM-volume visualizer." textFill="#6f6e6e" AnchorPane.leftAnchor="385.0" AnchorPane.rightAnchor="430.0">
             <font>
                 <Font name="System Italic" size="18.0" />
             </font>
         </Label>
-        <Label fx:id="statusLabel" layoutX="659.0" layoutY="38.0" prefHeight="17.0" prefWidth="171.0" text="NO_STATUS_DEFINED" AnchorPane.rightAnchor="194.0">
+        <Label fx:id="statusLabel" layoutX="964.0" layoutY="39.0" prefHeight="17.0" prefWidth="171.0" text="NO_STATUS_DEFINED" AnchorPane.rightAnchor="231.0">
          <font>
             <Font name="System Bold" size="14.0" />
          </font></Label>
-      <HBox layoutX="839.0" layoutY="33.0" prefHeight="27.0" prefWidth="171.0" spacing="10.0" AnchorPane.rightAnchor="14.0">
+      <HBox layoutX="839.0" layoutY="33.0" prefHeight="31.0" prefWidth="217.0" spacing="10.0" AnchorPane.rightAnchor="14.0">
          <children>
               <Button fx:id="quickButton" mnemonicParsing="false" onAction="#quickLoad" text="Quick Load" />
               <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadDataSet" text="Load Dataset" />
